@@ -1,0 +1,38 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build output
+build/
+dist/
+
+# .env files (환경 변수 파일)
+.env
+.env.*.
+
+# Next.js static files (React 프로젝트에서 Next.js를 사용할 경우)
+.next/
+out/
+
+# TypeScript build (NestJS에서 TypeScript를 사용 중이라면)
+*.tsbuildinfo
+
+# Jest test coverage (테스트 커버리지)
+coverage/
+
+# IDE 관련 파일들 (WebStorm, VSCode 등)
+.vscode/
+.idea/
+
+# Optional npm cache folder
+.npm/
