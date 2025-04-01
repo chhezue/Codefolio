@@ -1,54 +1,72 @@
 import { Module, Logger } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigService } from './config/config.service';
 import { ConfigModule } from './config/config.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { GithubModule } from './modules/github/github.module';
 import { AlgorithmModule } from './modules/algorithm/algorithm.module';
-import { GuestbookModule } from './modules/guestbook/guestbook.module';
 
 @Module({
     imports: [
         ConfigModule,
-        MongooseModule.forRootAsync({
+        TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (configService: ConfigService) => {
-                const logger = new Logger('MongoDB');
-                
+                const logger = new Logger('PostgreSQL');
+
                 try {
-                    const uri = configService.mongoUri;
-                    logger.log('MongoDB URI를 성공적으로 불러왔습니다.');
-                    
+                    const host = configService.get<string>('POSTGRES_HOST') || 'localhost'; // 기본값 'localhost'
+                    const port = parseInt(configService.get<string>('POSTGRES_PORT') || '5432'); // 기본값 '5432'
+                    const username = configService.get<string>('POSTGRES_USER') || 'codefolio'; // docker-compose 설정
+                    const password = configService.get<string>('POSTGRES_PASSWORD') || 'codefolio'; // docker-compose 설정
+                    const database = configService.get<string>('POSTGRES_DB') || 'codefolio'; // docker-compose 설정
+
+                    const uri = `postgres://${username}:${password}@${host}:${port}/${database}`;
+                    logger.log('PostgreSQL URI를 성공적으로 불러왔습니다.');
+
                     return {
-                        uri,
+                        type: 'postgres',
+                        host: host,
+                        port: port,
+                        username: username,
+                        password: password,
+                        database: database,
+                        synchronize: true, // 개발 환경에서는 true, 운영 환경에서는 false로 설정 권장
+                        logging: true,
+                        entities: [], // 엔티티 클래스 배열을 여기에 추가
+                        migrations: [], // 마이그레이션 추가 가능
+                        subscribers: [],
+                        logger: 'advanced-console',
+                        extra: {
+                            ssl: process.env.DATABASE_SSL === 'true', // SSL을 사용할 경우
+                        },
                         connectionFactory: (connection) => {
-                            logger.log('MongoDB에 연결 시도 중...');
-                            
-                            connection.on('connected', () => {
-                                logger.log('✅ MongoDB가 성공적으로 연결되었습니다!');
-                                logger.log(`📊 데이터베이스 URI: ${uri}`);
-                            });
-                            
-                            connection.on('error', (error) => {
-                                logger.error(`❌ MongoDB 연결 중 오류가 발생했습니다: ${error.message}`);
+                            logger.log('PostgreSQL에 연결 시도 중...');
+
+                            connection.on('connect', () => {
+                                logger.log('✅ PostgreSQL이 성공적으로 연결되었습니다!');
                             });
 
-                            connection.on('disconnected', () => {
-                                logger.warn('⚠️ MongoDB 연결이 끊어졌습니다.');
+                            connection.on('error', (error) => {
+                                logger.error(`❌ PostgreSQL 연결 중 오류가 발생했습니다: ${error.message}`);
                             });
-                            
+
+                            connection.on('disconnect', () => {
+                                logger.warn('⚠️ PostgreSQL 연결이 끊어졌습니다.');
+                            });
+
                             return connection;
-                        }
+                        },
                     };
                 } catch (error) {
-                    logger.error(`MongoDB URI 가져오기 실패: ${error.message}`);
+                    logger.error(`PostgreSQL URI 가져오기 실패: ${error.message}`);
                     throw error;
                 }
             },
         }),
         GithubModule,
         AlgorithmModule,
-        GuestbookModule,
+        CommitModule,
     ],
 })
 export class AppModule {}
