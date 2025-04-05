@@ -1,66 +1,57 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Algorithm } from './algorithm.schema';
-import { CreateAlgorithmDto } from './dto/create-algorithm.dto';
-import { UpdateAlgorithmDto } from './dto/update-algorithm.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Like } from 'typeorm';
+import { Algorithm } from './algorithm.entity';
+import { CreateAlgorithmDto, UpdateAlgorithmDto, GetAlgorithmDto } from './dto/algorithm.dto';
 
 @Injectable()
 export class AlgorithmService {
-  constructor(
-    @InjectModel(Algorithm.name) private algorithmModel: Model<Algorithm>,
-  ) {}
+    constructor(
+        @InjectRepository(Algorithm)
+        private readonly algorithmRepository: Repository<Algorithm>,
+    ) {}
 
-  async findAll() {
-    return this.algorithmModel.find().exec();
-  }
-
-  async findOne(id: string) {
-    const algorithm = await this.algorithmModel.findById(id).exec();
-    
-    if (!algorithm) {
-      throw new NotFoundException(`Algorithm with ID ${id} not found`);
+    async getAlgorithms(): Promise<GetAlgorithmDto[]> {
+        return await this.algorithmRepository.find({
+            order: {
+                created_at: 'DESC',
+                updated_at: 'DESC',
+            },
+        });
     }
-    
-    // 조회수 증가
-    algorithm.viewCount += 1;
-    await algorithm.save();
-    
-    return algorithm;
-  }
 
-  async create(createAlgorithmDto: CreateAlgorithmDto) {
-    const newAlgorithm = new this.algorithmModel(createAlgorithmDto);
-    return newAlgorithm.save();
-  }
-
-  async update(id: string, updateAlgorithmDto: UpdateAlgorithmDto) {
-    const updatedAlgorithm = await this.algorithmModel
-      .findByIdAndUpdate(id, updateAlgorithmDto, { new: true })
-      .exec();
-    
-    if (!updatedAlgorithm) {
-      throw new NotFoundException(`Algorithm with ID ${id} not found`);
+    async getAlgorithm(id: string): Promise<GetAlgorithmDto> {
+        const algorithm = await this.algorithmRepository.findOne({ where: { id: parseInt(id) } });
+        if (!algorithm) {
+            throw new NotFoundException(`Algorithm ${id} not found.`);
+        }
+        return algorithm;
     }
-    
-    return updatedAlgorithm;
-  }
 
-  async remove(id: string) {
-    const result = await this.algorithmModel.findByIdAndDelete(id).exec();
-    
-    if (!result) {
-      throw new NotFoundException(`Algorithm with ID ${id} not found`);
+    async createAlgorithm(createAlgorithmDto: CreateAlgorithmDto): Promise<GetAlgorithmDto> {
+        const newAlgorithm = this.algorithmRepository.create(createAlgorithmDto);
+        return await this.algorithmRepository.save(newAlgorithm);
     }
-    
-    return { id };
-  }
 
-  async findByTags(tags: string[]) {
-    return this.algorithmModel.find({ tags: { $in: tags } }).exec();
-  }
+    async updateAlgorithm(id: string, updateAlgorithmDto: UpdateAlgorithmDto): Promise<GetAlgorithmDto> {
+        await this.algorithmRepository.update(id, updateAlgorithmDto);
+        return await this.getAlgorithm(id);
+    }
 
-  async findByDifficulty(difficulty: string) {
-    return this.algorithmModel.find({ difficulty }).exec();
-  }
+    async deleteAlgorithm(id: string) {
+        const result = await this.algorithmRepository.delete(id);
+        if (result.affected === 0) {
+            throw new NotFoundException(`Algorithm ${id} not found.`);
+        }
+    }
+
+    async searchAlgorithm(search: string): Promise<GetAlgorithmDto[]> {
+        return await this.algorithmRepository.find({
+            where: [
+                { title: Like(`%${search}%`) },
+                { content: Like(`%${search}%`) },
+                { tags: Like(`%${search}%`) },
+            ],
+        });
+    }
 }

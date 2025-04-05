@@ -1,4 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn} from "typeorm";
+import { DifficultyLevel } from "./common/difficulty-level.enum";
 
 @Entity()
 export class Algorithm {
@@ -6,17 +7,23 @@ export class Algorithm {
     id: number; // 내부 식별자
 
     @Column("text")
-    title: string;
+    title: string; // 글 제목
 
     @Column("text")
-    description: string;
+    content: string; // 글 내용
+
+    @Column({ type: "enum", enum: DifficultyLevel })
+    difficulty: DifficultyLevel; // 난이도
 
     @Column("text")
-    template_code: string;
+    language: string; // 사용 언어
 
-    @Column("text")
-    language: string;
+    @Column("text", { array: true })
+    tags: string[]; // 문제 태그
 
     @CreateDateColumn()
-    created_at: Date;
+    created_at: Date; // 생성 시각
+
+    @UpdateDateColumn()
+    updated_at: Date; // 수정 시각
 }
