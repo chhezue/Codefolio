@@ -1,5 +1,5 @@
 import {IsString, IsArray, IsEnum, IsNotEmpty, IsOptional} from 'class-validator';
-import { DifficultyLevel } from "./common/difficulty-level.enum";
+import { DifficultyLevel } from "@algorithm/dto/common/difficulty-level.enum";
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAlgorithmDto {
@@ -15,8 +15,8 @@ export class CreateAlgorithmDto {
 
   @IsEnum(DifficultyLevel)
   @IsNotEmpty()
-  @ApiProperty({ description: '난이도' })
-  difficulty: string;
+  @ApiProperty({ description: '난이도', enum: DifficultyLevel })
+  difficulty: DifficultyLevel;
 
   @IsString()
   @IsNotEmpty()
@@ -41,7 +41,7 @@ export class UpdateAlgorithmDto {
 
   @IsEnum(DifficultyLevel)
   @IsOptional()
-  difficulty?: string;
+  difficulty?: DifficultyLevel;
 
   @IsString()
   @IsOptional()
@@ -54,9 +54,12 @@ export class UpdateAlgorithmDto {
 }
 
 export class GetAlgorithmDto {
+  id: number;
   title: string;
   content: string;
-  difficulty: string;
+  difficulty: DifficultyLevel;
   language: string;
   tags: string[];
+  created_at: Date;
+  updated_at: Date;
 }

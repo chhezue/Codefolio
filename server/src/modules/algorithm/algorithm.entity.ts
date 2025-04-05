@@ -1,5 +1,5 @@
 import {Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn} from "typeorm";
-import { DifficultyLevel } from "./common/difficulty-level.enum";
+import { DifficultyLevel } from "@algorithm/dto/common/difficulty-level.enum";
 
 @Entity()
 export class Algorithm {

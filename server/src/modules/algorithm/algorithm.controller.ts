@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { AlgorithmService } from './algorithm.service';
-import { CreateAlgorithmDto, UpdateAlgorithmDto } from './dto/algorithm.dto';
+import { AlgorithmService } from '@algorithm/algorithm.service';
+import { CreateAlgorithmDto, UpdateAlgorithmDto } from '@algorithm/dto/algorithm.dto';
 import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('algorithms')

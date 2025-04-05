@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ProjectService } from './project.service';
-import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
+import { ProjectService } from '@project/project.service';
+import { CreateProjectDto, UpdateProjectDto } from '@project/dto/project.dto';
 import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('projects')

@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AlgorithmController } from './algorithm.controller';
-import { AlgorithmService } from './algorithm.service';
-import { Algorithm, AlgorithmSchema } from './algorithm.schema';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AlgorithmController } from '@algorithm/algorithm.controller';
+import { AlgorithmService } from '@algorithm/algorithm.service';
+import { Algorithm } from '@algorithm/algorithm.entity';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Algorithm.name, schema: AlgorithmSchema },
-    ]),
+    TypeOrmModule.forFeature([Algorithm]),
   ],
   controllers: [AlgorithmController],
   providers: [AlgorithmService],

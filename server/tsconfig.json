@@ -19,9 +19,8 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "paths": {
-      "@guestbook/*": ["src/modules/guestbook/*"],
       "@algorithm/*": ["src/modules/algorithm/*"],
-      "@github/*": ["src/modules/github/*"],
+      "@project/*": ["src/modules/project/*"],
       "@config/*": ["src/config/*"]
     }
   },

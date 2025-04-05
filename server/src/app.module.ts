@@ -1,9 +1,11 @@
 import { Module, Logger } from '@nestjs/common';
-import { ConfigService } from './config/config.service';
-import { ConfigModule } from './config/config.module';
+import { ConfigService } from '@config/config.service';
+import { ConfigModule } from '@config/config.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GithubModule } from './modules/github/github.module';
-import { AlgorithmModule } from './modules/algorithm/algorithm.module';
+import { ProjectModule } from '@project/project.module';
+import { AlgorithmModule } from '@algorithm/algorithm.module';
+import { Project } from '@project/project.entity';
+import { Algorithm } from '@algorithm/algorithm.entity';
 
 @Module({
     imports: [
@@ -33,7 +35,7 @@ import { AlgorithmModule } from './modules/algorithm/algorithm.module';
                         database: database,
                         synchronize: true, // 개발 환경에서는 true, 운영 환경에서는 false로 설정 권장
                         logging: true,
-                        entities: [], // 엔티티 클래스 배열을 여기에 추가
+                        entities: [Project, Algorithm], // 엔티티 클래스 배열을 여기에 추가
                         migrations: [], // 마이그레이션 추가 가능
                         subscribers: [],
                         logger: 'advanced-console',
@@ -64,9 +66,8 @@ import { AlgorithmModule } from './modules/algorithm/algorithm.module';
                 }
             },
         }),
-        GithubModule,
         AlgorithmModule,
-        CommitModule,
+        ProjectModule,
     ],
 })
 export class AppModule {}

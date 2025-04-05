@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-import { Algorithm } from './algorithm.entity';
-import { CreateAlgorithmDto, UpdateAlgorithmDto, GetAlgorithmDto } from './dto/algorithm.dto';
+import { Algorithm } from '@algorithm/algorithm.entity';
+import { CreateAlgorithmDto, UpdateAlgorithmDto, GetAlgorithmDto } from '@algorithm/dto/algorithm.dto';
 
 @Injectable()
 export class AlgorithmService {

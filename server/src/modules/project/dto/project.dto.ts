@@ -89,6 +89,7 @@ export class UpdateProjectDto {
 }
 
 export class GetProjectDto {
+  id: number;
   title: string;
   summary: string;
   githubUrl: string;
