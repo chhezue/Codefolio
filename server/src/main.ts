@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
 import { Logger } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 // 애플리케이션 진입점
 async function bootstrap() {
@@ -19,6 +20,16 @@ async function bootstrap() {
     const nodeEnv = configService.get('NODE_ENV', 'development');
     const PORT = configService.port;
     
+    // Swagger 설정
+    const config = new DocumentBuilder()
+        .setTitle('Codefolio API')
+        .setDescription('Codefolio API Dcoument')
+        .setVersion('1.0')
+        .build();
+    
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+
     await app.listen(PORT);
     
     logger.log(`🚀 서버가 시작되었습니다!`);
