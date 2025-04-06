@@ -21,7 +21,8 @@
     "paths": {
       "@algorithm/*": ["src/modules/algorithm/*"],
       "@project/*": ["src/modules/project/*"],
-      "@config/*": ["src/config/*"]
+      "@mail/*": ["src/modules/mail/*"],
+      "@config/*": ["src/config/*"],
     }
   },
   "include": ["src/**/*"],

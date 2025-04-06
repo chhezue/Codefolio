@@ -1,11 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import ProjectCard, { Project } from '../components/project/ProjectCard';
 import TechStack from '../components/TechStack';
+import ProjectList from "./ProjectList";
+import PageLayout from '../components/layout/PageLayout';
 
 const ProfileDetail: React.FC = () => {
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <PageLayout>
       {/* 프로필 섹션 */}
       <section className="mb-16 bg-white rounded-lg shadow-sm p-8">
         <div className="flex flex-col md:flex-row items-start gap-8">
@@ -93,46 +93,9 @@ const ProfileDetail: React.FC = () => {
       <TechStack />
 
       {/* 프로젝트 섹션 */}
-      <section className="mb-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">프로젝트</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      </section>
-    </main>
+      <ProjectList />
+    </PageLayout>
   );
 };
-
-// 프로젝트 데이터
-const projects: Project[] = [
-  {
-    id: 1,
-    title: "쇼핑몰 플랫폼",
-    description: "React와 Node.js를 활용한 풀스택 이커머스 웹 애플리케이션입니다. 사용자 인증, 장바구니, 결제 기능을 구현했습니다.",
-    image: "https://via.placeholder.com/400x250?text=E-commerce+Platform",
-    technologies: ["React", "Node.js", "Express", "MongoDB", "Redux"],
-    github: "https://github.com/developer/ecommerce",
-    demo: "https://ecommerce-demo.example.com"
-  },
-  {
-    id: 2,
-    title: "포트폴리오 웹사이트",
-    description: "개인 포트폴리오를 위한 반응형 웹사이트입니다. 다양한 애니메이션과 인터랙티브 요소를 포함합니다.",
-    image: "https://via.placeholder.com/400x250?text=Portfolio+Website",
-    technologies: ["React", "TypeScript", "Tailwind CSS", "Framer Motion"],
-    github: "https://github.com/developer/portfolio",
-    demo: "https://portfolio.example.com"
-  },
-  {
-    id: 3,
-    title: "일정 관리 앱",
-    description: "할 일과 일정을 관리할 수 있는 모바일 친화적인 웹 애플리케이션입니다. 로컬 스토리지를 활용한 데이터 저장 기능을 제공합니다.",
-    image: "https://via.placeholder.com/400x250?text=Todo+App",
-    technologies: ["React", "Context API", "CSS Modules", "LocalStorage"],
-    github: "https://github.com/developer/todo-app"
-  }
-];
 
 export default ProfileDetail;

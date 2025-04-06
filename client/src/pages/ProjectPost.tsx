@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import ProjectFeatures from '../components/project/ProjectFeatures';
+import PageLayout from '../components/layout/PageLayout';
 
 // API URL
-const API_URL = 'http://localhost:3001'; // 실제 서버 URL로 변경
+const API_URL = 'http://localhost:3000'; // 실제 서버 URL로 변경
 
 // 프로젝트 상세 타입 정의
 interface ProjectDetails {
@@ -189,7 +190,7 @@ const ProjectPost: React.FC = () => {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <PageLayout className="max-w-7xl">
       <div className="mb-16">
         <h1 className="text-5xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-custom to-blue-600 bg-clip-text text-transparent">
           {projectData.projectTitle}
@@ -318,7 +319,7 @@ const ProjectPost: React.FC = () => {
           </Link>
         </div>
       </div>
-    </main>
+    </PageLayout>
   );
 };
 

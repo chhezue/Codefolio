@@ -6,6 +6,7 @@ import { ProjectModule } from '@project/project.module';
 import { AlgorithmModule } from '@algorithm/algorithm.module';
 import { Project } from '@project/project.entity';
 import { Algorithm } from '@algorithm/algorithm.entity';
+import { MailModule } from '@mail/mail.module';
 
 @Module({
     imports: [
@@ -40,7 +41,8 @@ import { Algorithm } from '@algorithm/algorithm.entity';
                         subscribers: [],
                         logger: 'advanced-console',
                         extra: {
-                            ssl: process.env.DATABASE_SSL === 'true', // SSL을 사용할 경우
+                            ssl: process.env.DATABASE_SSL === 'true',
+                            connectTimeout: 30000, // 30초
                         },
                         connectionFactory: (connection) => {
                             logger.log('PostgreSQL에 연결 시도 중...');
@@ -68,6 +70,7 @@ import { Algorithm } from '@algorithm/algorithm.entity';
         }),
         AlgorithmModule,
         ProjectModule,
+        MailModule,
     ],
 })
 export class AppModule {}
