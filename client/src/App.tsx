@@ -7,6 +7,7 @@ import AlgorithmList from './pages/AlgorithmList';
 import AlgorithmCreate from './pages/AlgorithmCreate';
 import ProfileDetail from './pages/ProfileDetail';
 import AlgorithmPost from 'pages/AlgorithmPost';
+import ProjectList from "./pages/ProjectList";
 
 const App: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const App: React.FC = () => {
         <main className="pt-16">
           <Routes>
             <Route path="/" element={<Main />} />
+            <Route path="/projects" element={<ProjectList />} />
             <Route path="/projects/:id" element={<ProjectPost />} />
             <Route path="/algorithm" element={<AlgorithmList />} />
             <Route path="/algorithm/:id" element={<AlgorithmPost />} />

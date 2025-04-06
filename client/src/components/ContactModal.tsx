@@ -9,11 +9,7 @@ interface ContactModalProps {
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    message: '',
-  });
-
+  const [formData, setFormData] = useState({ email: '', message: '' });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
@@ -31,10 +27,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-          `${API_URL}/contact`,
-          formData
-      );
+      const response = await axios.post(`${API_URL}/contact`, formData);
 
       if (response.data.success) {
         alert('메일이 성공적으로 전송되었습니다!');
@@ -54,47 +47,61 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full text-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-bold">연락하기</h3>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-              <i className="fas fa-times"></i>
-            </button>
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-md border border-slate-200">
+          <div className="p-6">
+            {/* 헤더 */}
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-semibold text-slate-800">연락하기</h3>
+              <button
+                  onClick={onClose}
+                  className="text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <i className="fas fa-times text-sm"></i>
+              </button>
+            </div>
+
+            {/* 폼 */}
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  이메일
+                </label>
+                <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-slate-300 text-sm rounded-md focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
+                    placeholder="이메일 주소를 입력해주세요."
+                    required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  문의 내용
+                </label>
+                <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-slate-300 text-sm rounded-md focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
+                    rows={5}
+                    placeholder="내용을 자유롭게 작성해주세요."
+                    required
+                ></textarea>
+              </div>
+
+              <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-indigo-500 text-white text-sm py-2 rounded-md hover:bg-indigo-600 transition disabled:opacity-50"
+              >
+                {loading ? '보내는 중...' : '보내기'}
+              </button>
+            </form>
           </div>
-          <form className="space-y-3" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">이메일</label>
-              <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md"
-                  placeholder="회신 받으실 이메일을 입력해주세요."
-                  required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">문의 내용</label>
-              <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-md"
-                  rows={4}
-                  placeholder="취업 제안이나 프로젝트 협업 등 문의하실 내용을 자유롭게 작성해주세요."
-                  required
-              ></textarea>
-            </div>
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-pink-400 text-white px-4 py-1.5 text-xs rounded-md hover:bg-pink-600 transition-colors disabled:opacity-50"
-            >
-              {loading ? '보내는 중...' : '보내기'}
-            </button>
-          </form>
         </div>
       </div>
   );

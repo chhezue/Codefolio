@@ -3,59 +3,71 @@ import { useNavigate } from 'react-router-dom';
 import ContactModal from '../components/ContactModal';
 import TechStack from '../components/TechStack';
 import ProjectList from './ProjectList';
+import { motion } from 'framer-motion';
 
 const LandingPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate(); // 라우터 훅 사용
+  const navigate = useNavigate();
 
   const handleGoToProfile = () => {
-    navigate('/profile'); // 프로필 페이지로 이동
+    navigate('/profile');
   };
 
   return (
-    <>
-      <section className="min-h-[calc(100vh-4rem)] flex items-center pt-16 pb-8 px-4">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div className="order-2 md:order-1 text-center md:text-right px-4">
-              <h1 className="text-xl font-bold mb-3">
-                안녕하세요,<br />NestJS 기반 백엔드 개발자 손채연입니다.
+      <>
+        <section className="min-h-[calc(100vh-4rem)] flex items-center pt-20 pb-12 px-4 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-800">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-8">
+            {/* 텍스트 영역 */}
+            <motion.div
+                className="text-center md:text-left px-4"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+            >
+              <h1 className="text-xl md:text-4xl font-bold mb-4 leading-snug whitespace-nowrap">
+                반갑습니다, <br />
+                <span className="text-indigo-600">NestJS 백엔드 개발자</span> 손채연입니다.
               </h1>
-              <p className="text-gray-600 text-sm mb-4">
-                새로운 기술을 배우고 적용하는 것을 좋아하며,<br />
-                사용자 경험을 중요시하는 개발자입니다.
+              <p className="text-slate-600 text-base mb-6 leading-relaxed">
+                기술을 배우는 데 열정적이며, <br />
+                사용자 경험 중심의 서비스를 고민합니다.
               </p>
-              <div className="flex justify-center md:justify-end space-x-3">
+              <div className="flex justify-center md:justify-start gap-4">
                 <button
-                  className="bg-pink-400 text-white px-4 py-1.5 !rounded-button hover:bg-gray-500 transition-colors text-xs"
-                  onClick={() => setIsModalOpen(true)}
+                    className="bg-indigo-500 text-white px-5 py-2 rounded-md hover:bg-indigo-600 transition text-sm"
+                    onClick={() => setIsModalOpen(true)}
                 >
-                  <i className="fas fa-paper-plane mr-1.5"></i>연락하기
+                  <i className="fas fa-paper-plane mr-2"></i>연락하기
                 </button>
-                <button 
-                  className="bg-white text-pink-500 border border-pink-300 px-4 py-1.5 !rounded-button hover:bg-gray-50 transition-colors text-xs" 
-                  onClick={handleGoToProfile}
+                <button
+                    className="border border-slate-400 text-slate-700 px-5 py-2 rounded-md hover:bg-slate-300 transition text-sm"
+                    onClick={handleGoToProfile}
                 >
-                  <i className="fas fa-info-circle mr-1.5"></i>자세히 보기
+                  <i className="fas fa-info-circle mr-2"></i>자세히 보기
                 </button>
               </div>
-            </div>
-            <div className="relative order-1 md:order-2 mt-4 md:mt-0 flex justify-center">
+            </motion.div>
+
+            {/* 이미지 영역 */}
+            <motion.div
+                className="flex justify-center"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+            >
               <img
-                src="/profileImage.jpeg"
-                alt="Profile Image"
-                className="w-1/2 md:w-3/5"
+                  src="/profileImage.jpeg"
+                  alt="Profile"
+                  className="w-48 md:w-56 rounded-lg shadow-xl object-cover"
               />
-            </div>
+            </motion.div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <TechStack />
-      <ProjectList />
-
-      <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </>
+        <TechStack />
+        <ProjectList />
+        <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      </>
   );
 };
 

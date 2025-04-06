@@ -44,45 +44,57 @@ const categories: TechCategory[] = [
     items: [
       { iconClass: 'devicon-git-plain', color: '#f1502f', name: 'Git', level: 90 },
       { iconClass: 'devicon-docker-plain', color: '#0db7ed', name: 'Docker', level: 60 },
-      { iconClass: 'devicon-amazonwebservices-original', color: '#ff9900', name: 'AWS', level: 60 },
+      { iconClass: 'devicon-amazonwebservices-plain-wordmark', color: '#ff9900', name: 'AWS', level: 60 },
     ],
   },
 ];
 
 const TechStack: React.FC = () => {
   return (
-    <section className="bg-white py-20">
-      <div className="max-w-7xl mx-auto px-8 sm:px-12">
-        <h2 className="text-3xl font-bold mb-12 text-center">기술 스택</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {categories.map((category, idx) => (
-            <div
-              key={idx}
-              className="bg-gray-50 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h3 className="text-xl font-semibold mb-6 text-center">{category.title}</h3>
-              <div className="grid grid-cols-3 gap-6">
-                {category.items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center text-center"
-                  >
-                    <i
-                      className={`${item.iconClass} text-4xl mb-3`}
-                      style={{ color: item.color }}
-                    ></i>
-                    <span className="font-medium">{item.name}</span>
-                    <div className="text-yellow-400 text-sm mt-1">
-                      {'★'.repeat(item.level / 20) + '☆'.repeat(5 - item.level / 20)}
-                    </div>
+      <section className="bg-slate-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold text-slate-800 mb-8 text-center">기술 스택</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {categories.map((category, idx) => (
+                <div
+                    key={idx}
+                    className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                >
+                  <h3 className="text-base font-semibold text-indigo-600 mb-4 text-center">
+                    {category.title}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {category.items.map((item, index) => (
+                        <div key={index} className="flex flex-col items-center text-center gap-1">
+                          <i
+                              className={`${item.iconClass} text-2xl`}
+                              style={{ color: item.color }}
+                          ></i>
+                          <span className="text-xs text-slate-700 font-medium">{item.name}</span>
+
+                          {/* 게이지 바 컨테이너 */}
+                          <div className="w-full flex justify-center">
+                            <div className="w-20 bg-slate-200 h-2 rounded-full overflow-hidden mt-1">
+                              <div
+                                  className="h-full rounded-full transition-all"
+                                  style={{
+                                    width: `${item.level}%`,
+                                    backgroundColor: item.color,
+                                  }}
+                              ></div>
+                            </div>
+                          </div>
+
+                          {/* 퍼센트 표시 */}
+                          <span className="text-[10px] text-slate-500">{item.level}%</span>
+                        </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                </div>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
   );
 };
 
