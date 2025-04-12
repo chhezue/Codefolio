@@ -1,0 +1,315 @@
+.tiptap-editor, .note-editor {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.editor-toolbar {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.editor-toolbar button {
+  border: none;
+  background: transparent;
+  border-radius: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.editor-toolbar button:hover {
+  background-color: #e2e8f0;
+}
+
+.editor-toolbar button.is-active {
+  background-color: #e2e8f0;
+  color: #1e40af;
+}
+
+.editor-toolbar .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ProseMirror {
+  padding: 1.25rem;
+  outline: none;
+  min-height: 200px;
+}
+
+.ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #94a3b8;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+}
+
+.ProseMirror ul li {
+  list-style-type: disc;
+}
+
+.ProseMirror ol li {
+  list-style-type: decimal;
+}
+
+.ProseMirror h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror code {
+  background-color: rgba(#616161, 0.1);
+  color: #616161;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  font-family: 'JetBrainsMono', monospace;
+  font-size: 0.875em;
+}
+
+.ProseMirror pre {
+  background: #0d0d0d;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: 0.875rem;
+  font-family: 'JetBrainsMono', monospace;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.25rem;
+}
+
+.ProseMirror blockquote {
+  padding-left: 1rem;
+  border-left: 3px solid #e2e8f0;
+  color: #64748b;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 2px solid rgba(#0d0d0d, 0.1);
+  margin: 2rem 0;
+}
+
+/* Table Styles */
+.ProseMirror table {
+  border-collapse: collapse;
+  margin: 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 0.5rem;
+  position: relative;
+  vertical-align: top;
+}
+
+.ProseMirror table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+}
+
+.ProseMirror table p {
+  margin: 0;
+}
+
+/* Task Lists */
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+.ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+
+.ProseMirror ul[data-type="taskList"] input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Bubble Menu */
+.bubble-menu {
+  display: flex;
+  background-color: #0f172a;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+}
+
+.bubble-menu button {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.bubble-menu button:hover {
+  background-color: #1e293b;
+}
+
+.bubble-menu button.is-active {
+  background-color: #1e293b;
+}
+
+/* Floating Menu */
+.floating-menu {
+  padding: 0.5rem;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.floating-menu button {
+  padding: 0.25rem 0.5rem;
+  margin: 0.125rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.floating-menu button:hover {
+  background-color: #f1f5f9;
+}
+
+/* Slash Commands Menu */
+.slash-commands-menu {
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  width: 300px;
+  max-height: 400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+}
+
+.slash-commands-header {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.slash-command-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.slash-commands-list {
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.slash-command-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.slash-command-item:hover {
+  background-color: #f1f5f9;
+}
+
+.slash-command-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: #f1f5f9;
+  border-radius: 0.25rem;
+  margin-right: 0.75rem;
+  font-weight: 600;
+}
+
+.slash-command-label {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #1e293b;
+}
+
+.slash-command-no-results {
+  padding: 1rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.875rem;
+} 
