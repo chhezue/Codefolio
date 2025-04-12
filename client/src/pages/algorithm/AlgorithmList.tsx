@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { AlgorithmItem } from '../components/algorithm/AlgorithmCard';
-import AlgorithmCard from '../components/algorithm/AlgorithmCard';
+import { AlgorithmItem } from '../../components/algorithm/AlgorithmCard';
+import AlgorithmCard from '../../components/algorithm/AlgorithmCard';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import PageLayout from '../components/layout/PageLayout';
+import PageLayout from '../../components/layout/PageLayout';
 
 const API_URL = 'http://localhost:3000'; // API 서버 URL (실제 환경에 맞게 수정)
 
@@ -68,7 +68,6 @@ const AlgorithmList: React.FC = () => {
     <PageLayout>
       <div className="mb-12">
         <h1 className="text-3xl font-bold text-primary-900 mb-4">알고리즘 학습 기록</h1>
-        <p className="text-lg text-primary-600">알고리즘과 자료구조 문제 풀이를 통한 학습 여정을 기록합니다. 각 카드를 클릭하여 상세 내용을 확인하세요.</p>
       </div>
 
       <div className="flex justify-between items-center mb-8">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import PageLayout from '../components/layout/PageLayout';
+import PageLayout from '../../components/layout/PageLayout';
 
 // API URL
 const API_URL = 'http://localhost:3000'; // 실제 서버 URL로 변경
@@ -106,18 +106,18 @@ const AlgorithmPost: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{post.title}</h1>
         <div className="flex flex-wrap items-center text-sm text-gray-600 mb-4">
           <span className="mr-4">
-            <i className="far fa-calendar-alt mr-1"></i> 
+            <i className="far fa-calendar-alt mr-1"></i>
             {formatDate(post.created_at)}
           </span>
           {post.updated_at !== post.created_at && (
             <span>
-              <i className="far fa-edit mr-1"></i> 
+              <i className="far fa-edit mr-1"></i>
               {formatDate(post.updated_at)} 수정됨
             </span>
           )}
         </div>
         <div className="flex flex-wrap gap-2 mb-6">
-          <span 
+          <span
             className={`px-3 py-1 text-sm font-medium rounded-full ${difficultyClasses[post.difficulty]}`}
           >
             {difficultyLabels[post.difficulty]}
@@ -142,8 +142,8 @@ const AlgorithmPost: React.FC = () => {
         <h3 className="text-lg font-semibold mb-4">관련 태그</h3>
         <div className="flex flex-wrap gap-2">
           {post.tags.map((tag, idx) => (
-            <span 
-              key={idx} 
+            <span
+              key={idx}
               className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm"
             >
               {tag}

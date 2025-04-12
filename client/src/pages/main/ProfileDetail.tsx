@@ -1,6 +1,6 @@
-import TechStack from '../components/TechStack';
-import PageLayout from '../components/layout/PageLayout';
-import ContactModal from "../components/ContactModal";
+import TechStack from '../../components/TechStack';
+import PageLayout from '../../components/layout/PageLayout';
+import ContactModal from "../../components/ContactModal";
 import React, { useState } from 'react';
 import PinnedProjects from 'components/project/PinnedProjects';
 
