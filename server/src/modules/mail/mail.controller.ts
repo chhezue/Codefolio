@@ -2,7 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { MailService } from '@mail/mail.service';
 import { ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
 
-@ApiTags('연락')
+@ApiTags('문의 메일 보내기')
 @Controller('contact')
 export class ContactController {
   constructor(private readonly mailService: MailService) {}

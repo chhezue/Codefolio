@@ -1,14 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Main from './pages/Main';
-import AlgorithmList from './pages/AlgorithmList';
-import AlgorithmCreate from './pages/AlgorithmCreate';
-import ProfileDetail from './pages/ProfileDetail';
-import AlgorithmPost from 'pages/AlgorithmPost';
-import ProjectList from "./pages/ProjectList";
-import ProjectCreate from './pages/ProjectCreate';
-import ProjectPost from './pages/ProjectPost';
+import Main from './pages/main/Main';
+import AlgorithmList from './pages/algorithm/AlgorithmList';
+import AlgorithmCreate from './pages/algorithm/AlgorithmCreate';
+import ProfileDetail from './pages/main/ProfileDetail';
+import AlgorithmPost from 'pages/algorithm/AlgorithmPost';
+import ProjectList from "./pages/project/ProjectList";
+import ProjectCreate from './pages/project/ProjectCreate';
+import ProjectPost from './pages/project/ProjectPost';
 
 const App: React.FC = () => {
   return (
