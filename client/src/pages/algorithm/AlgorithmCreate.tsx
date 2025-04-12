@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PageLayout from '../../components/layout/PageLayout';
-import TiptapEditor from '../../components/editor/TiptapEditor';
+import NoteEditor from '../../components/editor/NoteEditor';
 
 // API URL
 const API_URL = 'http://localhost:3000'; // 실제 서버 URL로 변경
@@ -113,10 +113,11 @@ const AlgorithmCreate: React.FC = () => {
               <label htmlFor="content" className="block text-gray-700 font-medium mb-2">
                 내용 <span className="text-red-500">*</span>
               </label>
-              <TiptapEditor
+              <NoteEditor
                 content={formData.content}
                 onChange={handleEditorChange}
                 placeholder="문제 해결 접근 방식, 알고리즘, 시간 복잡도 분석 등을 상세히 작성해주세요."
+                simpleMode={true}
               />
               <p className="mt-2 text-sm text-gray-500">
                 문제 해결 접근 방식, 알고리즘, 시간 복잡도 분석 등을 상세히 작성해주세요.
