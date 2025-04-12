@@ -11,13 +11,19 @@ export class AlgorithmService {
         private readonly algorithmRepository: Repository<Algorithm>,
     ) {}
 
-    async getAlgorithms(): Promise<GetAlgorithmDto[]> {
-        return await this.algorithmRepository.find({
-            order: {
-                created_at: 'DESC',
-                updated_at: 'DESC',
-            },
+    async getAlgorithms(page: number, limit: number) {
+        const [items, total] = await this.algorithmRepository.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            order: { created_at: 'DESC' },
         });
+
+        return {
+            items,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 
     async getAlgorithm(id: string): Promise<GetAlgorithmDto> {

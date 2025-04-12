@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProjectService } from '@project/project.service';
 import { CreateProjectDto, UpdateProjectDto } from '@project/dto/project.dto';
-import { ApiOperation, ApiQuery, ApiTags, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('프로젝트')
 @Controller('projects')
@@ -11,8 +11,11 @@ export class ProjectController {
   @ApiOperation({ summary: '모든 프로젝트 포스트 출력' })
   @ApiResponse({ status: 200, description: '모든 프로젝트 포스트 목록' })
   @Get()
-  getProjects() {
-    return this.projectService.getProjects();
+  getProjects(
+      @Query('page') page: number,
+      @Query('limit') limit: number,
+  ) {
+    return this.projectService.getProjects(page, limit);
   }
 
   @ApiOperation({ summary: '메인 페이지용 핀된 프로젝트 출력' })

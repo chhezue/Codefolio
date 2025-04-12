@@ -11,8 +11,11 @@ export class AlgorithmController {
   @ApiOperation({ summary: '모든 알고리즘 포스트 출력' })
   @ApiResponse({ status: 200, description: '모든 알고리즘 포스트 목록' })
   @Get()
-  getAlgorithms() {
-    return this.algorithmService.getAlgorithms();
+  getAlgorithms(
+      @Query('page') page: number,
+      @Query('limit') limit: number,
+  ) {
+    return this.algorithmService.getAlgorithms(page, limit);
   }
 
   @ApiOperation({ summary: '특정 알고리즘 포스트 출력' })

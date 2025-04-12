@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Project } from '@project/project.entity';
 import { CreateProjectDto, UpdateProjectDto, GetProjectDto } from '@project/dto/project.dto';
 
@@ -11,22 +11,24 @@ export class ProjectService {
         private readonly projectRepository: Repository<Project>,
     ) {}
 
-    async getProjects(): Promise<GetProjectDto[]> {
-        return await this.projectRepository.find({
-            order: {
-                created_at: 'DESC',
-                updated_at: 'DESC',
-            },
+    async getProjects(page: number, limit: number) {
+        const [items, total] = await this.projectRepository.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+            order: { created_at: 'DESC' },
         });
+
+        return {
+            items,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 
     async getPinnedProjects(): Promise<GetProjectDto[]> {
         return await this.projectRepository.find({
             where: { pin: true },
-            order: {
-                created_at: 'DESC',
-                updated_at: 'DESC',
-            },
             take: 3, // 최대 3개까지 가져옴
         });
     }
