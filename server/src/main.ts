@@ -23,8 +23,22 @@ async function bootstrap() {
     // Swagger 설정
     const config = new DocumentBuilder()
         .setTitle('Codefolio API')
-        .setDescription('Codefolio API Dcoument')
+        .setDescription('Codefolio API Document')
         .setVersion('1.0')
+        .addTag('알고리즘', '알고리즘 포스트 관련 API')
+        .addTag('프로젝트', '프로젝트 포스트 관련 API')
+        .addTag('연락', '이메일 연락 관련 API')
+        .addBearerAuth(
+            {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+                name: 'JWT',
+                description: '인증 토큰을 입력하세요',
+                in: 'header',
+            },
+            'access-token',
+        )
         .build();
     
     const document = SwaggerModule.createDocument(app, config);
@@ -34,6 +48,7 @@ async function bootstrap() {
     
     logger.log(`🚀 서버가 시작되었습니다!`);
     logger.log(`🌐 URL: http://localhost:${PORT}`);
+    logger.log(`📚 API 문서: http://localhost:${PORT}/api`);
     logger.log(`🔧 환경: ${nodeEnv}`);
     
     if (configService.isDevelopment) {

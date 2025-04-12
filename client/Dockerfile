@@ -1,4 +1,4 @@
-FROM node:20-alpine as build
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -8,12 +8,12 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+EXPOSE 3001
 
-FROM nginx:alpine
+ENV PORT=3001
+ENV WATCHPACK_POLLING=true
+ENV CHOKIDAR_USEPOLLING=true
+ENV WDS_SOCKET_PORT=0
+ENV FAST_REFRESH=false
 
-COPY --from=build /app/build /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"] 
+CMD ["npm", "start"] 

@@ -14,7 +14,7 @@ interface TechCategory {
 
 const categories: TechCategory[] = [
   {
-    title: 'Language',
+    title: '[언어]',
     items: [
       { iconClass: 'devicon-javascript-plain', color: '#f7df1e', name: 'JavaScript', level: 100 },
       { iconClass: 'devicon-typescript-plain', color: '#3178c6', name: 'TypeScript', level: 100 },
@@ -24,7 +24,7 @@ const categories: TechCategory[] = [
     ],
   },
   {
-    title: 'Framework & Library',
+    title: '[프레임워크 & 라이브러리]',
     items: [
       { iconClass: 'devicon-react-original', color: '#61dafb', name: 'React', level: 50 },
       { iconClass: 'devicon-nodejs-plain', color: '#68a063', name: 'Node.js', level: 100 },
@@ -32,7 +32,7 @@ const categories: TechCategory[] = [
     ],
   },
   {
-    title: 'Database',
+    title: '[데이터베이스]',
     items: [
       { iconClass: 'devicon-mongodb-plain', color: '#47A248', name: 'MongoDB', level: 80 },
       { iconClass: 'devicon-mysql-plain', color: '#00758f', name: 'MySQL', level: 70 },
@@ -40,7 +40,7 @@ const categories: TechCategory[] = [
     ],
   },
   {
-    title: 'Tool etc',
+    title: '[버전 관리 & 클라우드드]',
     items: [
       { iconClass: 'devicon-git-plain', color: '#f1502f', name: 'Git', level: 90 },
       { iconClass: 'devicon-docker-plain', color: '#0db7ed', name: 'Docker', level: 60 },
@@ -51,16 +51,16 @@ const categories: TechCategory[] = [
 
 const TechStack: React.FC = () => {
   return (
-      <section className="bg-slate-50 py-12">
+      <section className="bg-primary-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8 text-center">기술 스택</h2>
+          <h2 className="text-2xl font-bold text-primary-800 mb-8 text-center">기술 스택</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {categories.map((category, idx) => (
                 <div
                     key={idx}
-                    className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                    className="bg-white p-5 rounded-xl shadow-sm border border-primary-100 hover:shadow-md transition-shadow"
                 >
-                  <h3 className="text-base font-semibold text-indigo-600 mb-4 text-center">
+                  <h3 className="text-base font-semibold text-accent-600 mb-4 text-center">
                     {category.title}
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -70,11 +70,11 @@ const TechStack: React.FC = () => {
                               className={`${item.iconClass} text-2xl`}
                               style={{ color: item.color }}
                           ></i>
-                          <span className="text-xs text-slate-700 font-medium">{item.name}</span>
+                          <span className="text-xs text-primary-700 font-medium">{item.name}</span>
 
                           {/* 게이지 바 컨테이너 */}
                           <div className="w-full flex justify-center">
-                            <div className="w-20 bg-slate-200 h-2 rounded-full overflow-hidden mt-1">
+                            <div className="w-20 bg-primary-200 h-2 rounded-full overflow-hidden mt-1">
                               <div
                                   className="h-full rounded-full transition-all"
                                   style={{
@@ -86,7 +86,7 @@ const TechStack: React.FC = () => {
                           </div>
 
                           {/* 퍼센트 표시 */}
-                          <span className="text-[10px] text-slate-500">{item.level}%</span>
+                          <span className="text-[10px] text-primary-500">{item.level}%</span>
                         </div>
                     ))}
                   </div>

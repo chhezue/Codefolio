@@ -2,12 +2,13 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Main from './pages/Main';
-import ProjectPost from './pages/ProjectPost';
 import AlgorithmList from './pages/AlgorithmList';
 import AlgorithmCreate from './pages/AlgorithmCreate';
 import ProfileDetail from './pages/ProfileDetail';
 import AlgorithmPost from 'pages/AlgorithmPost';
 import ProjectList from "./pages/ProjectList";
+import ProjectCreate from './pages/ProjectCreate';
+import ProjectPost from './pages/ProjectPost';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Main />} />
             <Route path="/projects" element={<ProjectList />} />
             <Route path="/projects/:id" element={<ProjectPost />} />
+            <Route path="/projects/create" element={<ProjectCreate />} />
             <Route path="/algorithm" element={<AlgorithmList />} />
             <Route path="/algorithm/:id" element={<AlgorithmPost />} />
             <Route path="/algorithm/create" element={<AlgorithmCreate />} />

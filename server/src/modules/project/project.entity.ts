@@ -35,6 +35,9 @@ export class Project {
     @Column("text", { array: true })
     technologies: string[]; // 기술 스택
 
+    @Column("boolean", { default: false })
+    pin: boolean; // 메인 페이지에 고정할지 여부
+
     // 주요 기능 & 구현 화면
     @Column("jsonb")
     features: {
