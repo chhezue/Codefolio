@@ -33,7 +33,7 @@ export class ProjectService {
         });
     }
 
-    async getProject(id: string): Promise<GetProjectDto> {
+    async getProject(id: number): Promise<GetProjectDto> {
         const project = await this.projectRepository.findOne({ where: { id: parseInt(id) } });
         if (!project) {
             throw new NotFoundException(`Project ${id} not found.`);
@@ -50,6 +50,49 @@ export class ProjectService {
         const newProject = this.projectRepository.create(createProjectDto);
         return await this.projectRepository.save(newProject);
     }
+
+    // src/project/project.service.ts
+    async create(createProjectDto: CreateProjectDto, files: any) {
+        const { features, screenshots } = createProjectDto;
+
+        // features 이미지 처리
+        const featuresWithImageUrls = features.map((feature, index) => {
+            const file = files?.[`features[${index}][imageFile]`]?.[0];
+            return {
+                ...feature,
+                imageUrl: file ? `/uploads/${file.filename}` : null,
+            };
+        });
+
+        // screenshots 이미지 처리
+        const screenshotsWithUrls = (screenshots || []).map((shot, index) => {
+            const file = files?.[`screenshots[${index}][imageFile]`]?.[0];
+            return {
+                ...shot,
+                imageUrl: file ? `/uploads/${file.filename}` : null,
+            };
+        });
+
+        // 이후 DB 저장 로직
+        const project = await this.prisma.project.create({
+            data: {
+                ...createProjectDto,
+                features: {
+                    createMany: {
+                        data: featuresWithImageUrls,
+                    },
+                },
+                screenshots: {
+                    createMany: {
+                        data: screenshotsWithUrls,
+                    },
+                },
+            },
+        });
+
+        return project;
+    }
+
 
     async updateProject(id: string, updateProjectDto: UpdateProjectDto): Promise<GetProjectDto> {
         // pin=true로 업데이트하려는 경우 확인

@@ -16,10 +16,6 @@ Thumbs.db
 build/
 dist/
 
-# .env files (환경 변수 파일)
-.env
-.env.*.
-
 # Next.js static files (React 프로젝트에서 Next.js를 사용할 경우)
 .next/
 out/

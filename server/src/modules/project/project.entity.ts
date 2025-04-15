@@ -1,57 +1,51 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
 @Entity()
 export class Project {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-    @CreateDateColumn()
-    created_at: Date;
+  @Column()
+  title: string;
 
-    @UpdateDateColumn()
-    updated_at: Date;
+  @Column({ type: "text" })
+  description: string;
 
-    @Column("text")
-    title: string; // 포스트 제목
+  @Column()
+  role: string;
 
-    @Column("text")
-    summary: string; // 포스트 상단 설명
+  @Column({ type: "date" })
+  periodStart: Date;
 
-    @Column("text")
-    githubUrl: string; // 깃허브 링크
+  @Column({ type: "date" })
+  periodEnd: Date;
 
-    @Column("text")
-    period: string; // 개발 기간
+  @Column("text", { array: true })
+  stack: string[]; // 예: ["React", "Node.js", "MongoDB", "AWS"]
 
-    @Column("text")
-    role: string; // 역할
+  // 주요 기능들
+  @Column({ type: "jsonb" })
+  features: {
+    title: string;
+    description: string;
+    imageUrl?: string;
+  }[];
 
-    @Column("text", { array: true })
-    technologies: string[]; // 기술 스택
+  // 기술적 도전과 해결과정
+  @Column({ type: "jsonb" })
+  techChallenges: {
+    title: string;
+    description: string;
+  }[];
 
-    @Column("boolean", { default: false })
-    pin: boolean; // 메인 페이지에 고정할지 여부
+  // 실제 구현 화면
+  @Column({ type: "jsonb" })
+  screenshots: {
+    imageUrl: string;
+    description?: string;
+  }[];
 
-    // 주요 기능 & 구현 화면
-    @Column("jsonb")
-    features: {
-        title?: string | null;
-        description?: string | null;
-        imageUrl: string;
-        imageAlt: string;
-    }[];
-
-    // 도전 과제
-    @Column("jsonb")
-    challenges: {
-        number: number;
-        title: string;
-        description: string;
-    }[];
+  // 메인 페이지 고정 여부
+  @Column({ default: false })
+  pin: boolean;
 }
