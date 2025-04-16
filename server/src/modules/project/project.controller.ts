@@ -9,17 +9,14 @@ import {
   UseInterceptors,
   UploadedFiles,
   Query,
-  ParseIntPipe,
 } from "@nestjs/common";
 import {
-  FileFieldsInterceptor,
   FilesInterceptor,
 } from "@nestjs/platform-express";
 import { ProjectService } from "@project/project.service";
 import {
   CreateProjectDto,
   UpdateProjectDto,
-  ProjectResponseDto,
 } from "@project/dto/project.dto";
 import { projectMulterOptions } from "@config/multer.config";
 

@@ -18,7 +18,7 @@
     "docker:clean": "docker-compose down -v --remove-orphans"
   },
   "devDependencies": {
-    "@types/node": "^22.13.14",
+    "@types/node": "^20.11.30",
     "concurrently": "^8.2.2"
   },
   "dependencies": {

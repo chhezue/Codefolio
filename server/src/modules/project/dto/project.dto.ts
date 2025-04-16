@@ -40,6 +40,21 @@ class ScreenshotDto {
   description?: string;
 }
 
+class DocumentDto {
+  @IsString()
+  type: 'GITHUB' | 'DOC' | 'STATS';
+
+  @IsString()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  icon?: string;
+
+  @IsString()
+  link: string;
+}
+
 // 기본 프로젝트 DTO (생성용)
 export class CreateProjectDto {
   @IsString()
@@ -52,10 +67,10 @@ export class CreateProjectDto {
   role: string;
 
   @IsDateString()
-  periodStart: string;
+  periodStart: Date;
 
   @IsDateString()
-  periodEnd: string;
+  periodEnd: Date;
 
   @IsArray()
   @IsString({ each: true })
@@ -75,6 +90,11 @@ export class CreateProjectDto {
   @ValidateNested({ each: true })
   @Type(() => ScreenshotDto)
   screenshots: ScreenshotDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DocumentDto)
+  documents: DocumentDto[];
 
   @IsBoolean()
   @IsOptional()
@@ -97,11 +117,11 @@ export class UpdateProjectDto {
 
   @IsDateString()
   @IsOptional()
-  periodStart?: string;
+  periodStart?: Date;
 
   @IsDateString()
   @IsOptional()
-  periodEnd?: string;
+  periodEnd?: Date;
 
   @IsArray()
   @IsString({ each: true })
@@ -126,24 +146,31 @@ export class UpdateProjectDto {
   @IsOptional()
   screenshots?: ScreenshotDto[];
 
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DocumentDto)
+  @IsOptional()
+  documents?: DocumentDto[];
+
   @IsBoolean()
   @IsOptional()
   pin?: boolean;
 }
 
 // 조회용 DTO (응답에 사용)
-export class ProjectResponseDto {
-  id: string;
-  title: string;
-  description: string;
-  role: string;
-  periodStart: string;
-  periodEnd: string;
-  stack: string[];
-  features: FeatureDto[];
-  techChallenges: TechChallengeDto[];
-  screenshots: ScreenshotDto[];
+export class GetProjectDto {
+  id: string; // 프로젝트 고유 ID
+  title: string; // 프로젝트 제목
+  description: string; // 프로젝트 설명
+  role: string; // 맡은 역할
+  periodStart: Date; // 시작 기간
+  periodEnd: Date; // 종료 기간
+  stack: string[]; // 사용 기술 스택
+  features: FeatureDto[]; // 주요 기능
+  techChallenges: TechChallengeDto[]; // 기술적 도전과 해결 과정
+  screenshots: ScreenshotDto[]; // 실제 구현 화면 (최대 3개)
+  documents: DocumentDto[]; // 프로젝트 문서 (GitHub, 기술 문서, 통계 등)
+  pin: boolean; // 고정 여부
+  createdAt: Date; // 생성 시간
+  updatedAt: Date; // 업데이트 시간
 }
-
-// 기존 서비스 호환을 위한 별칭
-export class GetProjectDto extends ProjectResponseDto {}
