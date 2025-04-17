@@ -1,128 +1,151 @@
-import {Injectable, NotFoundException, BadRequestException} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
-import {Project} from '@project/project.entity';
-import {CreateProjectDto, UpdateProjectDto, GetProjectDto} from '@project/dto/project.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Project } from "@project/project.entity";
+import {
+  CreateProjectDto,
+  GetProjectDto,
+  UpdateProjectDto,
+} from "@project/dto/project.dto";
 
 @Injectable()
 export class ProjectService {
-    constructor(
-        @InjectRepository(Project)
-        private readonly projectRepository: Repository<Project>,
-    ) {
+  constructor(
+    @InjectRepository(Project)
+    private readonly projectRepository: Repository<Project>
+  ) {}
+
+  async getProjects(page: number, limit: number) {
+    const [items, total] = await this.projectRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: "DESC" },
+    });
+
+    return {
+      items,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getPinnedProjects(): Promise<GetProjectDto[]> {
+    return await this.projectRepository.find({
+      where: { pin: true },
+      take: 3,
+    });
+  }
+
+  async getProject(id: string): Promise<GetProjectDto> {
+    const project = await this.projectRepository.findOne({ where: { id } });
+    if (!project) {
+      throw new NotFoundException(`${id} 프로젝트를 찾을 수 없습니다.`);
     }
 
-    // 모든 프로젝트 조회 (페이지네이션 출력)
-    async getProjects(page: number, limit: number) {
-        const [items, total] = await this.projectRepository.findAndCount({
-            skip: (page - 1) * limit,
-            take: limit,
-            order: {createdAt: 'DESC'},
-        });
+    return project;
+  }
 
-        return {
-            items,
-            total,
-            page,
-            totalPages: Math.ceil(total / limit),
-        };
+  async createProject(
+    createProjectDto: CreateProjectDto,
+    files: {
+      featureImages: Express.Multer.File[];
+      screenshotImages: Express.Multer.File[];
+    }
+  ): Promise<GetProjectDto> {
+    // 고정 3개 검증 로직 실행
+    if (createProjectDto.pin) {
+      await this.validatePinLimit();
     }
 
-    // 고정된 프로젝트 출력 (최대 3개)
-    async getPinnedProjects(): Promise<GetProjectDto[]> {
-        return await this.projectRepository.find({
-            where: {pin: true},
-            take: 3,
-        });
+    const featureUrls = files.featureImages.map(
+      (f) => `/uploads/${f.filename}`
+    );
+    const screenshotUrls = files.screenshotImages.map(
+      (f) => `/uploads/${f.filename}`
+    );
+
+    const features = createProjectDto.features.map((feature, i) => ({
+      ...feature,
+      imageUrl: featureUrls[i] ?? null,
+    }));
+
+    const screenshots = createProjectDto.screenshots.map((screenshot, i) => ({
+      ...screenshot,
+      imageUrl: screenshotUrls[i] ?? null,
+    }));
+
+    return await this.projectRepository.save({
+      ...createProjectDto,
+      features,
+      screenshots,
+    });
+  }
+
+  async updateProject(
+    id: string,
+    updateProjectDto: UpdateProjectDto,
+    files?: {
+      featureImages?: Express.Multer.File[];
+      screenshotImages?: Express.Multer.File[];
+    }
+  ): Promise<GetProjectDto> {
+    // 고정 3개 검증 로직 실행
+    if (updateProjectDto.pin) {
+      const project = await this.projectRepository.findOne({ where: { id } });
+      if (!project?.pin) {
+        await this.validatePinLimit();
+      }
     }
 
-    async getProject(id: string): Promise<GetProjectDto> {
-        const project = await this.projectRepository.findOne({where: {id}});
-        if (!project) {
-            throw new NotFoundException(`Project ${id} not found.`);
-        }
-        return project;
+    const featureUrls =
+      files?.featureImages?.map((f) => `/uploads/${f.filename}`) ?? [];
+    const screenshotUrls =
+      files?.screenshotImages?.map((f) => `/uploads/${f.filename}`) ?? [];
+
+    const features =
+      updateProjectDto.features?.map((feature, i) => ({
+        ...feature,
+        imageUrl: featureUrls[i] ?? null,
+      })) ?? [];
+
+    const screenshots =
+      updateProjectDto.screenshots?.map((screenshot, i) => ({
+        ...screenshot,
+        imageUrl: screenshotUrls[i] ?? null,
+      })) ?? [];
+
+    await this.projectRepository.update(id, {
+      ...updateProjectDto,
+      features,
+      screenshots,
+    });
+    const updatedProject = await this.projectRepository.findOne({
+      where: { id },
+    });
+    return updatedProject ?? null;
+  }
+
+  async deleteProject(id: string) {
+    const result = await this.projectRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`${id} 프로젝트를 찾을 수 없습니다.`);
     }
+  }
 
-    async createProject(createProjectDto: CreateProjectDto): Promise<GetProjectDto> {
-        // pin=true로 설정하려는 경우 이미 3개가 있는지 확인
-        if (createProjectDto.pin) {
-            await this.validatePinLimit();
-        }
-
-        const newProject = this.projectRepository.create(createProjectDto);
-        return await this.projectRepository.save(newProject);
+  // 고정된 프로젝트가 3개인지 확인하는 메소드
+  private async validatePinLimit() {
+    const pinnedCount = await this.projectRepository.count({
+      where: { pin: true },
+    });
+    if (pinnedCount >= 3) {
+      throw new BadRequestException(
+        "이미 3개의 프로젝트가 메인 페이지에 고정되어 있습니다. 다른 프로젝트의 고정을 해제한 후 다시 시도해주세요."
+      );
     }
-
-    // src/project/project.service.ts
-    async create(createProjectDto: CreateProjectDto, files: any) {
-        const {features, screenshots} = createProjectDto;
-
-        // features 이미지 처리
-        const featuresWithImageUrls = features.map((feature, index) => {
-            const file = files?.[`features[${index}][imageFile]`]?.[0];
-            return {
-                ...feature,
-                imageUrl: file ? `/uploads/${file.filename}` : null,
-            };
-        });
-
-        // screenshots 이미지 처리
-        const screenshotsWithUrls = (screenshots || []).map((shot, index) => {
-            const file = files?.[`screenshots[${index}][imageFile]`]?.[0];
-            return {
-                ...shot,
-                imageUrl: file ? `/uploads/${file.filename}` : null,
-            };
-        });
-
-        // 이후 DB 저장 로직
-        const project = await this.prisma.project.create({
-            data: {
-                ...createProjectDto,
-                features: {
-                    createMany: {
-                        data: featuresWithImageUrls,
-                    },
-                },
-                screenshots: {
-                    createMany: {
-                        data: screenshotsWithUrls,
-                    },
-                },
-            },
-        });
-
-        return project;
-    }
-
-
-    async updateProject(id: string, updateProjectDto: UpdateProjectDto): Promise<GetProjectDto> {
-        // pin=true로 업데이트하려는 경우 확인
-        if (updateProjectDto.pin) {
-            const project = await this.projectRepository.findOne({where: {id}});
-            // 현재 프로젝트가 이미 핀되어 있지 않고, 핀하려는 경우에만 검증
-            if (!project.pin) {
-                await this.validatePinLimit();
-            }
-        }
-
-        await this.projectRepository.update(id, updateProjectDto);
-        return await this.getProject(id);
-    }
-
-    async deleteProject(id: string) {
-        const result = await this.projectRepository.delete(id);
-        if (result.affected === 0) {
-            throw new NotFoundException(`Project ${id} not found.`);
-        }
-    }
-
-    // 핀된 프로젝트가 이미 3개인지 확인하는 헬퍼 메서드
-    private async validatePinLimit() {
-        const pinnedCount = await this.projectRepository.count({where: {pin: true}});
-        if (pinnedCount >= 3) {
-            throw new BadRequestException('이미 3개의 프로젝트가 메인 페이지에 고정되어 있습니다. 다른 프로젝트의 고정을 해제한 후 다시 시도해주세요.');
-        }
-    }
+  }
 }

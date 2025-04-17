@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import ProjectCard from '../../components/project/ProjectCard';
-
-const API_URL = 'http://localhost:3000';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import ProjectCard from "../components/project/ProjectCard";
+import { api } from "../config/api";
 
 // GetProjectDto 기반 프로젝트 타입 정의
 export interface Project {
@@ -32,41 +31,44 @@ const ProjectList: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>('all');
-  
+  const [filter, setFilter] = useState<string>("all");
+
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
   const projectsPerPage = 6; // 페이지당 6개 프로젝트
 
   // 검색 상태
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [searchResults, setSearchResults] = useState<Project[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   // 기술 스택 필터 목록 생성
-  const allTechnologies = Array.from(new Set(
-    projects.flatMap(project => project.technologies)
-  )).sort();
+  const allTechnologies = Array.from(
+    new Set(projects.flatMap((project) => project.technologies)),
+  ).sort();
 
   // 필터링 및 검색 결과 계산
   const getFilteredProjects = () => {
     // 검색 중인 경우 검색 결과를 필터링
     const projectsToFilter = isSearching ? searchResults : projects;
-    
-    return filter === 'all' 
-      ? projectsToFilter 
-      : projectsToFilter.filter(project => 
-        project.technologies.includes(filter)
-      );
+
+    return filter === "all"
+      ? projectsToFilter
+      : projectsToFilter.filter((project) =>
+          project.technologies.includes(filter),
+        );
   };
 
   const filteredProjects = getFilteredProjects();
-  
+
   // 현재 페이지에 표시할 프로젝트
   const indexOfLastProject = currentPage * projectsPerPage;
   const indexOfFirstProject = indexOfLastProject - projectsPerPage;
-  const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
-  
+  const currentProjects = filteredProjects.slice(
+    indexOfFirstProject,
+    indexOfLastProject,
+  );
+
   // 총 페이지 수 계산
   const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
 
@@ -74,21 +76,23 @@ const ProjectList: React.FC = () => {
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
     // 페이지 상단으로 스크롤
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
 
   // API 연동
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/projects`);
+        const response = await axios.get(api.projects);
         setProjects(response.data);
         setError(null);
       } catch (err) {
-        console.error('프로젝트 데이터를 가져오는 중 오류가 발생했습니다:', err);
-        setError('프로젝트 데이터를 불러오는 중 오류가 발생했습니다.');
+        console.error(
+          "프로젝트 데이터를 가져오는 중 오류가 발생했습니다:",
+          err,
+        );
+        setError("프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
@@ -123,27 +127,27 @@ const ProjectList: React.FC = () => {
           </Link>
         </div>
       </div>
-      
+
       {/* 필터 버튼 */}
       <div className="flex flex-wrap justify-center gap-2 mb-10">
-        <button 
-          onClick={() => setFilter('all')}
+        <button
+          onClick={() => setFilter("all")}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-            filter === 'all' 
-              ? 'bg-indigo-600 text-white' 
-              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            filter === "all"
+              ? "bg-indigo-600 text-white"
+              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
           }`}
         >
           전체
         </button>
-        {allTechnologies.map(tech => (
-          <button 
+        {allTechnologies.map((tech) => (
+          <button
             key={tech}
             onClick={() => setFilter(tech)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === tech 
-                ? 'bg-indigo-600 text-white' 
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              filter === tech
+                ? "bg-indigo-600 text-white"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}
           >
             {tech}
@@ -154,14 +158,11 @@ const ProjectList: React.FC = () => {
       {/* 프로젝트 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {currentProjects.map((project) => (
-          <div 
+          <div
             key={project.id}
             className="transition-all duration-300 hover:-translate-y-2"
           >
-            <Link 
-              to={`/projects/${project.id}`} 
-              className="block h-full"
-            >
+            <Link to={`/projects/${project.id}`} className="block h-full">
               <ProjectCard project={project} />
             </Link>
           </div>
@@ -175,12 +176,12 @@ const ProjectList: React.FC = () => {
           <h3 className="text-xl font-medium mb-2">
             {isSearching
               ? `"${searchKeyword}"에 대한 검색 결과가 없습니다`
-              : '프로젝트를 찾을 수 없습니다'}
+              : "프로젝트를 찾을 수 없습니다"}
           </h3>
           <p>
-            {isSearching 
-              ? '다른 키워드로 검색해보세요'
-              : '다른 필터를 선택해보세요'}
+            {isSearching
+              ? "다른 키워드로 검색해보세요"
+              : "다른 필터를 선택해보세요"}
           </p>
         </div>
       )}
@@ -194,8 +195,8 @@ const ProjectList: React.FC = () => {
               disabled={currentPage === 1}
               className={`relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
                 currentPage === 1
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               이전
@@ -206,8 +207,8 @@ const ProjectList: React.FC = () => {
                 onClick={() => handlePageChange(index + 1)}
                 className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${
                   currentPage === index + 1
-                    ? 'z-10 bg-indigo-600 text-white border-indigo-500'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    ? "z-10 bg-indigo-600 text-white border-indigo-500"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 {index + 1}
@@ -218,8 +219,8 @@ const ProjectList: React.FC = () => {
               disabled={currentPage === totalPages}
               className={`relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
                 currentPage === totalPages
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
               다음

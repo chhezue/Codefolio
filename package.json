@@ -10,24 +10,15 @@
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
     "build": "cd server && npm run build && cd ../client && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up",
-    "docker:down": "docker-compose down",
-    "docker:dev": "docker-compose up --build",
-    "docker:logs": "docker-compose logs -f",
-    "docker:clean": "docker-compose down -v --remove-orphans"
+    "lint": "cd server && npm run lint && cd ../client && npm run lint",
+    "clean": "rm -rf node_modules && cd server && rm -rf node_modules && cd ../client && rm -rf node_modules",
+    "update:all": "npm update && cd server && npm update && cd ../client && npm update"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "run-script-webpack-plugin": "^0.2.3",
+    "webpack-node-externals": "^3.0.0"
   },
-  "dependencies": {
-    "@nestjs-modules/mailer": "^1.8.1",
-    "@nestjs/axios": "^3.0.0",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.1",
-    "nodemailer": "^6.10.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  }
+  "dependencies": {}
 }

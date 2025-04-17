@@ -1,23 +1,19 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
-  UseInterceptors,
-  UploadedFiles,
   Query,
+  UploadedFiles,
+  UseInterceptors,
+  BadRequestException,
 } from "@nestjs/common";
-import {
-  FilesInterceptor,
-} from "@nestjs/platform-express";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ProjectService } from "@project/project.service";
-import {
-  CreateProjectDto,
-  UpdateProjectDto,
-} from "@project/dto/project.dto";
+import { CreateProjectDto, UpdateProjectDto } from "@project/dto/project.dto";
 import { projectMulterOptions } from "@config/multer.config";
 
 @Controller("projects")
@@ -26,7 +22,7 @@ export class ProjectController {
 
   // 모든 프로젝트 포스트 출력
   @Get()
-  async findAll(
+  async getProjects(
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 10
   ) {
@@ -41,35 +37,69 @@ export class ProjectController {
 
   // 특정 프로젝트 포스트 출력
   @Get("/:id")
-  async findOne(@Param("id") id: string) {
+  async getProject(@Param("id") id: string) {
     return this.projectService.getProject(id);
   }
 
   // 프로젝트 포스트 등록
   @Post()
-  @UseInterceptors(FilesInterceptor("files", 3, projectMulterOptions))
-  create(
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: "featureImages", maxCount: 4 },
+        { name: "screenshotImages", maxCount: 3 },
+      ],
+      projectMulterOptions
+    )
+  )
+  createProject(
     @Body() createDto: CreateProjectDto,
-    @UploadedFiles() files: Express.Multer.File[]
+    @UploadedFiles()
+    files: {
+      featureImages?: Express.Multer.File[];
+      screenshotImages?: Express.Multer.File[];
+    }
   ) {
-    return this.projectService.create(createDto, files);
+    // 필수 파일이 없는 경우 에러 처리
+    if (!files?.featureImages?.length || !files?.screenshotImages?.length) {
+      throw new BadRequestException("이미지는 필수입니다.");
+    }
+
+    return this.projectService.createProject(createDto, {
+      featureImages: files.featureImages,
+      screenshotImages: files.screenshotImages,
+    });
   }
 
   // 프로젝트 포스트 수정
   @Put("/:id")
-  @UseInterceptors(FilesInterceptor("files", 3, projectMulterOptions))
-  async update(
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: "featureImages", maxCount: 4 },
+        { name: "screenshotImages", maxCount: 3 },
+      ],
+      projectMulterOptions
+    )
+  )
+  async updateProject(
     @Param("id") id: string,
     @Body() updateProjectDto: UpdateProjectDto,
     @UploadedFiles()
-    files: Express.Multer.File[]
+    files: {
+      featureImages?: Express.Multer.File[];
+      screenshotImages?: Express.Multer.File[];
+    }
   ) {
-    return this.projectService.updateProject(id, updateProjectDto);
+    return this.projectService.updateProject(id, updateProjectDto, {
+      featureImages: files.featureImages,
+      screenshotImages: files.screenshotImages,
+    });
   }
 
   // 프로젝트 포스트 삭제
   @Delete("/:id")
-  async delete(@Param("id") id: string) {
+  async deleteProject(@Param("id") id: string) {
     return await this.projectService.deleteProject(id);
   }
 }

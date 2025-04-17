@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ContactModal from '../../components/ContactModal';
-import TechStack from '../../components/TechStack';
-import PinnedProjects from '../../components/project/PinnedProjects';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ContactModal from "../components/ContactModal";
+import TechStack from "../components/TechStack";
+import PinnedProjects from "../components/project/PinnedProjects";
+import { motion } from "framer-motion";
 
 const Main: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleGoToProfile = () => {
-    navigate('/profile');
+    navigate("/profile");
   };
 
   return (
@@ -26,7 +26,8 @@ const Main: React.FC = () => {
           >
             <h1 className="text-xl md:text-4xl font-bold mb-4 leading-snug whitespace-nowrap">
               반갑습니다, <br />
-              <span className="text-accent-600">NestJS 백엔드 개발자</span> 손채연입니다.
+              <span className="text-accent-600">NestJS 백엔드 개발자</span>{" "}
+              손채연입니다.
             </h1>
             <p className="text-primary-600 text-base mb-6 leading-relaxed">
               기술을 배우는 데 열정적이며, <br />
@@ -66,7 +67,10 @@ const Main: React.FC = () => {
 
       <TechStack />
       <PinnedProjects />
-      <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ContactModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </>
   );
 };

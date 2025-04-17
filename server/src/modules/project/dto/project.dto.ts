@@ -1,12 +1,10 @@
 import {
-  IsString,
-  IsDateString,
   IsArray,
-  IsOptional,
-  IsUUID,
-  ValidateNested,
-  IsObject,
   IsBoolean,
+  IsDateString,
+  IsOptional,
+  IsString,
+  ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -42,7 +40,7 @@ class ScreenshotDto {
 
 class DocumentDto {
   @IsString()
-  type: 'GITHUB' | 'DOC' | 'STATS';
+  type: "GITHUB" | "DOC" | "STATS";
 
   @IsString()
   title: string;
