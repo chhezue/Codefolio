@@ -35,7 +35,7 @@ class ScreenshotDto {
 
   @IsString()
   @IsOptional()
-  description?: string;
+  description: string;
 }
 
 class DocumentDto {

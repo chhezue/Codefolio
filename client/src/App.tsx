@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
 import Main from "./pages/Main";
-import ProfileDetail from "./pages/ProfileDetail";
+import Profile from "./pages/Profile";
 import ProjectList from "./pages/ProjectList";
 import ProjectCreate from "./pages/ProjectCreate";
 import ProjectPost from "./pages/ProjectPost";
@@ -18,7 +18,7 @@ const App: React.FC = () => {
             <Route path="/projects" element={<ProjectList />} />
             <Route path="/projects/:id" element={<ProjectPost />} />
             <Route path="/projects/create" element={<ProjectCreate />} />
-            <Route path="/profile" element={<ProfileDetail />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
       </div>

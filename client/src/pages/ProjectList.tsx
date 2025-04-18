@@ -3,74 +3,48 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import ProjectCard from "../components/project/ProjectCard";
 import { api } from "../config/api";
-
-// GetProjectDto 기반 프로젝트 타입 정의
-export interface Project {
-  id: number;
-  title: string;
-  summary: string;
-  githubUrl: string;
-  period: string;
-  role: string;
-  technologies: string[];
-  pin: boolean;
-  features: {
-    title?: string | null;
-    description?: string | null;
-    imageUrl: string;
-    imageAlt: string;
-  }[];
-  challenges: {
-    number: number;
-    title: string;
-    description: string;
-  }[];
-}
+import { Project } from "../components/project/ProjectCard";
 
 const ProjectList: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("all");
-
-  // 페이지네이션 상태
+  const [filter, setFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const projectsPerPage = 6; // 페이지당 6개 프로젝트
+  const projectsPerPage = 9; // 페이지당 프로젝트 수
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
 
-  // 검색 상태
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchResults, setSearchResults] = useState<Project[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-
-  // 기술 스택 필터 목록 생성
-  const allTechnologies = Array.from(
-    new Set(projects.flatMap((project) => project.technologies)),
-  ).sort();
-
-  // 필터링 및 검색 결과 계산
-  const getFilteredProjects = () => {
-    // 검색 중인 경우 검색 결과를 필터링
-    const projectsToFilter = isSearching ? searchResults : projects;
-
+  // 필터링된 프로젝트
+  const filteredProjects = React.useMemo(() => {
     return filter === "all"
-      ? projectsToFilter
-      : projectsToFilter.filter((project) =>
-          project.technologies.includes(filter),
+      ? projects
+      : projects.filter(
+          (project) => project.stack && project.stack.includes(filter)
         );
-  };
+  }, [projects, filter]);
 
-  const filteredProjects = getFilteredProjects();
+  // 모든 기술 스택 추출 (중복 제거)
+  const allTechnologies = React.useMemo(() => {
+    // projects가 배열인지 확인
+    if (!Array.isArray(projects)) {
+      return [];
+    }
+
+    const techs = projects.flatMap((project) => project.stack || []);
+    return Array.from(new Set(techs)).sort();
+  }, [projects]);
 
   // 현재 페이지에 표시할 프로젝트
-  const indexOfLastProject = currentPage * projectsPerPage;
-  const indexOfFirstProject = indexOfLastProject - projectsPerPage;
   const currentProjects = filteredProjects.slice(
-    indexOfFirstProject,
-    indexOfLastProject,
+    (currentPage - 1) * projectsPerPage,
+    currentPage * projectsPerPage
   );
 
   // 총 페이지 수 계산
-  const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
+  const calculatedTotalPages = Math.ceil(
+    filteredProjects.length / projectsPerPage
+  );
 
   // 페이지 변경 핸들러
   const handlePageChange = (pageNumber: number) => {
@@ -85,14 +59,36 @@ const ProjectList: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(api.projects);
-        setProjects(response.data);
-        setError(null);
+
+        // fetchProjects 함수 내부에 추가
+        if (response.data && response.data.items) {
+          setProjects(response.data.items);
+          setTotalPages(response.data.totalPages || 1);
+          setTotalItems(response.data.total || 0);
+        }
+
+        // 응답 데이터 구조 확인 및 처리
+        if (
+          response.data &&
+          response.data.items &&
+          Array.isArray(response.data.items)
+        ) {
+          setProjects(response.data.items);
+        } else if (Array.isArray(response.data)) {
+          // 기존 배열 형식 지원 유지
+          setProjects(response.data);
+        } else {
+          console.error("API 응답이 예상 형식이 아닙니다:", response.data);
+          setProjects([]);
+          setError("프로젝트 데이터 형식이 올바르지 않습니다.");
+        }
       } catch (err) {
         console.error(
           "프로젝트 데이터를 가져오는 중 오류가 발생했습니다:",
-          err,
+          err
         );
         setError("프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
+        setProjects([]);
       } finally {
         setLoading(false);
       }
@@ -169,59 +165,36 @@ const ProjectList: React.FC = () => {
         ))}
       </div>
 
-      {/* 표시할 프로젝트가 없을 때 */}
-      {filteredProjects.length === 0 && (
-        <div className="text-center py-16 text-slate-500">
-          <div className="text-5xl mb-4">🔍</div>
-          <h3 className="text-xl font-medium mb-2">
-            {isSearching
-              ? `"${searchKeyword}"에 대한 검색 결과가 없습니다`
-              : "프로젝트를 찾을 수 없습니다"}
-          </h3>
-          <p>
-            {isSearching
-              ? "다른 키워드로 검색해보세요"
-              : "다른 필터를 선택해보세요"}
-          </p>
-        </div>
-      )}
-
       {/* 페이지네이션 */}
-      {filteredProjects.length > 0 && totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex justify-center mt-12">
           <nav className="inline-flex rounded-md shadow">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                currentPage === 1
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-700 hover:bg-gray-50"
-              }`}
+              className="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               이전
             </button>
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index}
-                onClick={() => handlePageChange(index + 1)}
-                className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${
-                  currentPage === index + 1
-                    ? "z-10 bg-indigo-600 text-white border-indigo-500"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (number) => (
+                <button
+                  key={number}
+                  onClick={() => handlePageChange(number)}
+                  className={`px-4 py-2 border border-gray-300 text-sm font-medium ${
+                    currentPage === number
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white text-gray-500 hover:bg-gray-50"
+                  }`}
+                >
+                  {number}
+                </button>
+              )
+            )}
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                currentPage === totalPages
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-700 hover:bg-gray-50"
-              }`}
+              className="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               다음
             </button>

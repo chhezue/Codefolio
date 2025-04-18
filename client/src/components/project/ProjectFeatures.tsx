@@ -1,20 +1,21 @@
-import React from 'react';
+import React from "react";
 
 interface Feature {
-  imageUrl: string;
-  imageAlt: string;
   title: string;
   description: string;
+  imageUrl?: string;
 }
 
 interface ProjectFeaturesProps {
   features: Feature[];
 }
 
-const FeatureCard: React.FC<Feature> = ({ imageUrl, imageAlt, title, description }) => {
+const FeatureCard: React.FC<Feature> = ({ imageUrl, title, description }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <img src={imageUrl} alt={imageAlt} className="w-full h-64 object-cover" />
+      {imageUrl && (
+        <img src={imageUrl} alt={title} className="w-full h-64 object-cover" />
+      )}
       <div className="p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
         <p className="text-gray-600">{description}</p>
@@ -36,4 +37,4 @@ const ProjectFeatures: React.FC<ProjectFeaturesProps> = ({ features }) => {
   );
 };
 
-export default ProjectFeatures; 
+export default ProjectFeatures;

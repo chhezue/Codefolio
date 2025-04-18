@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import ProjectCard from "./ProjectCard";
-import { Project } from "../../pages/ProjectList";
+import { Project } from "./ProjectCard";
 import { api } from "../../config/api";
 
 const PinnedProjects: React.FC = () => {
@@ -15,12 +15,26 @@ const PinnedProjects: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(api.pinnedProjects);
-        setPinnedProjects(response.data);
-        setError(null);
+
+        // 응답 데이터 구조 확인 및 처리
+        if (
+          response.data &&
+          response.data.items &&
+          Array.isArray(response.data.items)
+        ) {
+          setPinnedProjects(response.data.items);
+        } else if (Array.isArray(response.data)) {
+          // 기존 배열 형식 지원 유지
+          setPinnedProjects(response.data);
+        } else {
+          console.error("API 응답이 예상 형식이 아닙니다:", response.data);
+          setPinnedProjects([]);
+          setError("고정된 프로젝트 데이터 형식이 올바르지 않습니다.");
+        }
       } catch (err) {
         console.error(
           "고정된 프로젝트 데이터를 가져오는 중 오류가 발생했습니다:",
-          err,
+          err
         );
         setError("고정된 프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
         setPinnedProjects([]);

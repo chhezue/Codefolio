@@ -4,7 +4,7 @@ import ContactModal from "../components/ContactModal";
 import React, { useState } from "react";
 import PinnedProjects from "components/project/PinnedProjects";
 
-const ProfileDetail: React.FC = () => {
+const Profile: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -132,4 +132,4 @@ const ProfileDetail: React.FC = () => {
   );
 };
 
-export default ProfileDetail;
+export default Profile;
