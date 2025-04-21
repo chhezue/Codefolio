@@ -35,10 +35,16 @@ export class ProjectService {
   }
 
   async getPinnedProjects(): Promise<GetProjectDto[]> {
-    return await this.projectRepository.find({
+    const projects = await this.projectRepository.find({
       where: { pin: true },
       take: 3,
     });
+
+    if (!projects) {
+      throw new NotFoundException("고정된 프로젝트를 찾을 수 없습니다.");
+    }
+
+    return projects;
   }
 
   async getProject(id: string): Promise<GetProjectDto> {

@@ -1,4 +1,3 @@
-// Docker 관련 코드 제거
 export const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3003";
 
 export const api = {

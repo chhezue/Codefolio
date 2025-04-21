@@ -52,8 +52,9 @@ const ProjectUpdate: React.FC = () => {
       imageFile: File | null;
       imagePreview: string;
       imageAlt: string;
+      description: string;
     }[]
-  >([{ imageFile: null, imagePreview: "", imageAlt: "" }]);
+  >([{ imageFile: null, imagePreview: "", imageAlt: "", description: "" }]);
 
   // 도전 과제 목록
   const [challenges, setChallenges] = useState<
@@ -197,7 +198,7 @@ const ProjectUpdate: React.FC = () => {
     if (screenshots.length < 3) {
       setScreenshots((prev) => [
         ...prev,
-        { imageFile: null, imagePreview: "", imageAlt: "" },
+        { imageFile: null, imagePreview: "", imageAlt: "", description: "" },
       ]);
     }
   };
@@ -339,6 +340,7 @@ const ProjectUpdate: React.FC = () => {
       // 스크린샷 추가
       validScreenshots.forEach((screenshot, index) => {
         formData.append(`screenshots[${index}][imageAlt]`, screenshot.imageAlt);
+        formData.append(`screenshots[${index}][description]`, screenshot.description || "");
         if (screenshot.imageFile) {
           formData.append(`screenshots[${index}][image]`, screenshot.imageFile);
         }
@@ -390,13 +392,13 @@ const ProjectUpdate: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            프로젝트 등록
+            프로젝트 수정
           </h1>
           <p className="text-gray-500 text-lg">
-            당신의 멋진 프로젝트를 소개해주세요
+            프로젝트 정보를 수정할 수 있습니다.
           </p>
         </div>
 
@@ -406,7 +408,10 @@ const ProjectUpdate: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl shadow-md p-10 mb-12"
+        >
           {/* 기본 정보 섹션 */}
           <section className="mb-14">
             <h2 className="text-2xl font-semibold text-gray-800 mb-8 pb-3 border-b border-gray-100">
@@ -439,15 +444,15 @@ const ProjectUpdate: React.FC = () => {
                 >
                   프로젝트 요약 <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <textarea
                   id="summary"
                   name="summary"
                   value={basicInfo.summary}
                   onChange={handleBasicInfoChange}
                   className="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
+                  rows={3}
                   required
-                />
+                ></textarea>
               </div>
 
               <div>
@@ -707,10 +712,10 @@ const ProjectUpdate: React.FC = () => {
             >
               {isSubmitting ? (
                 <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i>등록 중...
+                  <i className="fas fa-spinner fa-spin mr-2"></i>수정 중...
                 </>
               ) : (
-                "등록하기"
+                "수정하기"
               )}
             </button>
           </div>

@@ -52,8 +52,9 @@ const ProjectCreate: React.FC = () => {
       imageFile: File | null;
       imagePreview: string;
       imageAlt: string;
+      description: string;
     }[]
-  >([{ imageFile: null, imagePreview: "", imageAlt: "" }]);
+  >([{ imageFile: null, imagePreview: "", imageAlt: "", description: "" }]);
 
   // 도전 과제 목록
   const [challenges, setChallenges] = useState<
@@ -197,7 +198,7 @@ const ProjectCreate: React.FC = () => {
     if (screenshots.length < 3) {
       setScreenshots((prev) => [
         ...prev,
-        { imageFile: null, imagePreview: "", imageAlt: "" },
+        { imageFile: null, imagePreview: "", imageAlt: "", description: "" },
       ]);
     }
   };
@@ -339,6 +340,7 @@ const ProjectCreate: React.FC = () => {
       // 스크린샷 추가
       validScreenshots.forEach((screenshot, index) => {
         formData.append(`screenshots[${index}][imageAlt]`, screenshot.imageAlt);
+        formData.append(`screenshots[${index}][description]`, screenshot.description || "");
         if (screenshot.imageFile) {
           formData.append(`screenshots[${index}][image]`, screenshot.imageFile);
         }
@@ -579,285 +581,25 @@ const ProjectCreate: React.FC = () => {
             </div>
           </section>
 
-          {/* 주요 기능 섹션 - 수정된 FeatureForm 컴포넌트 사용 */}
-          <section className="mb-14">
-            <div className="flex justify-between items-center mb-8 pb-3 border-b border-gray-100">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                주요 기능
-              </h2>
-              <button
-                type="button"
-                onClick={handleAddFeature}
-                disabled={features.length >= 3}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  features.length >= 3
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "text-accent-500 bg-accent-50 hover:bg-accent-100"
-                }`}
-              >
-                + 기능 추가 {features.length}/3
-              </button>
-            </div>
+          {/* 주요 기능 섹션 */}
+          <FeatureForm
+            features={features}
+            handleFeatureChange={handleFeatureChange}
+            handleRemoveFeature={handleRemoveFeature}
+            handleAddFeature={handleAddFeature}
+            handleFileUpload={handleFileUpload}
+            setFeatureFileInputRef={setFeatureFileInputRef}
+          />
 
-            <div className="space-y-10">
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className="p-7 bg-gray-50 rounded-xl relative hover:bg-gray-100/50 transition-all shadow-sm"
-                >
-                  {features.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFeature(index)}
-                      className="absolute top-5 right-5 text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
-                  )}
-
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">
-                        기능 제목 <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={feature.title}
-                        onChange={(e) =>
-                          handleFeatureChange(index, "title", e.target.value)
-                        }
-                        className="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
-                        placeholder="기능 제목"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">
-                        기능 설명 <span className="text-red-500">*</span>
-                      </label>
-                      <textarea
-                        value={feature.description}
-                        onChange={(e) =>
-                          handleFeatureChange(
-                            index,
-                            "description",
-                            e.target.value
-                          )
-                        }
-                        className="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
-                        rows={3}
-                        placeholder="기능에 대한 자세한 설명"
-                        required
-                      ></textarea>
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">
-                        기능 이미지
-                      </label>
-                      <div className="flex flex-col gap-4">
-                        <div className="w-full">
-                          {feature.imagePreview ? (
-                            <div className="relative mb-4">
-                              <img
-                                src={feature.imagePreview}
-                                alt={feature.imageAlt || "기능 이미지 미리보기"}
-                                className="w-full h-auto max-h-64 object-contain rounded-lg border border-gray-200"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleFeatureChange(index, "imageFile", null);
-                                  handleFeatureChange(
-                                    index,
-                                    "imagePreview",
-                                    ""
-                                  );
-                                  handleFeatureChange(index, "imageAlt", "");
-                                }}
-                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors"
-                              >
-                                <i className="fas fa-times"></i>
-                              </button>
-                            </div>
-                          ) : (
-                            <div
-                              onClick={() =>
-                                featureFileInputRefs.current[index]?.click()
-                              }
-                              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-accent-400 transition-colors"
-                            >
-                              <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                              <p className="text-gray-500">
-                                클릭하여 이미지 업로드
-                              </p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                PNG, JPG, GIF 파일 (최대 5MB)
-                              </p>
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            ref={(el) => setFeatureFileInputRef(el, index)}
-                            onChange={(e) =>
-                              handleFileUpload(e, "feature", index)
-                            }
-                            accept="image/*"
-                            className="hidden"
-                          />
-                        </div>
-                        {feature.imagePreview && (
-                          <div className="w-full">
-                            <label className="block text-gray-700 font-medium mb-2">
-                              이미지 설명
-                            </label>
-                            <input
-                              type="text"
-                              value={feature.imageAlt}
-                              onChange={(e) =>
-                                handleFeatureChange(
-                                  index,
-                                  "imageAlt",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
-                              placeholder="이미지에 대한 간단한 설명"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* 실제 구현 화면 섹션 - 수정된 ScreenshotForm 컴포넌트 사용 */}
-          <section className="mb-14">
-            <div className="flex justify-between items-center mb-8 pb-3 border-b border-gray-100">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                실제 구현 화면
-              </h2>
-              <button
-                type="button"
-                onClick={handleAddScreenshot}
-                disabled={screenshots.length >= 3}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  screenshots.length >= 3
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "text-accent-500 bg-accent-50 hover:bg-accent-100"
-                }`}
-              >
-                + 스크린샷 추가 {screenshots.length}/3
-              </button>
-            </div>
-
-            <div className="space-y-10">
-              {screenshots.map((screenshot, index) => (
-                <div
-                  key={index}
-                  className="p-7 bg-gray-50 rounded-xl relative hover:bg-gray-100/50 transition-all shadow-sm"
-                >
-                  {screenshots.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveScreenshot(index)}
-                      className="absolute top-5 right-5 text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
-                  )}
-
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">
-                        스크린샷 <span className="text-red-500">*</span>
-                      </label>
-                      <div className="flex flex-col gap-4">
-                        <div className="w-full">
-                          {screenshot.imagePreview ? (
-                            <div className="relative mb-4">
-                              <img
-                                src={screenshot.imagePreview}
-                                alt={screenshot.imageAlt || "스크린샷 미리보기"}
-                                className="w-full h-auto max-h-64 object-contain rounded-lg border border-gray-200"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleScreenshotChange(
-                                    index,
-                                    "imageFile",
-                                    null
-                                  );
-                                  handleScreenshotChange(
-                                    index,
-                                    "imagePreview",
-                                    ""
-                                  );
-                                  handleScreenshotChange(index, "imageAlt", "");
-                                }}
-                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors"
-                              >
-                                <i className="fas fa-times"></i>
-                              </button>
-                            </div>
-                          ) : (
-                            <div
-                              onClick={() =>
-                                screenshotFileInputRefs.current[index]?.click()
-                              }
-                              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-accent-400 transition-colors"
-                            >
-                              <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                              <p className="text-gray-500">
-                                클릭하여 스크린샷 업로드
-                              </p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                PNG, JPG, GIF 파일 (최대 5MB)
-                              </p>
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            ref={(el) => setScreenshotFileInputRef(el, index)}
-                            onChange={(e) =>
-                              handleFileUpload(e, "screenshot", index)
-                            }
-                            accept="image/*"
-                            className="hidden"
-                          />
-                        </div>
-                        {screenshot.imagePreview && (
-                          <div className="w-full">
-                            <label className="block text-gray-700 font-medium mb-2">
-                              스크린샷 설명
-                            </label>
-                            <input
-                              type="text"
-                              value={screenshot.imageAlt}
-                              onChange={(e) =>
-                                handleScreenshotChange(
-                                  index,
-                                  "imageAlt",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
-                              placeholder="스크린샷에 대한 간단한 설명"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          {/* 실제 구현 화면 섹션 */}
+          <ScreenshotForm
+            screenshots={screenshots}
+            handleScreenshotChange={handleScreenshotChange}
+            handleRemoveScreenshot={handleRemoveScreenshot}
+            handleAddScreenshot={handleAddScreenshot}
+            handleFileUpload={handleFileUpload}
+            setScreenshotFileInputRef={setScreenshotFileInputRef}
+          />
 
           {/* 도전 과제 섹션 */}
           <section className="mb-14">

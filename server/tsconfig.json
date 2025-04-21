@@ -19,7 +19,6 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "paths": {
-      "@algorithm/*": ["src/modules/algorithm/*"],
       "@project/*": ["src/modules/project/*"],
       "@mail/*": ["src/modules/mail/*"],
       "@config/*": ["src/config/*"],
