@@ -11,4 +11,7 @@ export const api = {
   createProject: `${API_URL}/projects`,
   updateProject: (id: string) => `${API_URL}/projects/${id}`,
   deleteProject: (id: string) => `${API_URL}/projects/${id}`,
+
+  // 로그인 엔드포인트
+  login: `${API_URL}/auth/login`,
 };

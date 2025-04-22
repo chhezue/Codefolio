@@ -10,6 +10,8 @@ import {
   UploadedFiles,
   UseInterceptors,
   BadRequestException,
+  Headers,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ProjectService } from "@project/project.service";
@@ -56,6 +58,7 @@ export class ProjectController {
     )
   )
   createProject(
+    @Headers("Authorization") auth: string,
     @Body() createDto: CreateProjectDto,
     @UploadedFiles()
     files: {
@@ -63,6 +66,12 @@ export class ProjectController {
       screenshotImages?: Express.Multer.File[];
     }
   ) {
+    // 토큰 검증
+    const token = auth?.split(" ")[1]; // 'Bearer xxx'
+    if (!this.authService.verifyToken(token)) {
+      throw new UnauthorizedException("관리자 권한이 없습니다.");
+    }
+
     // 필수 파일이 없는 경우 에러 처리
     if (!files?.featureImages?.length || !files?.screenshotImages?.length) {
       throw new BadRequestException("이미지는 필수입니다.");
@@ -92,6 +101,7 @@ export class ProjectController {
     )
   )
   async updateProject(
+    @Headers("Authorization") auth: string,
     @Param("id") id: string,
     @Body() updateProjectDto: UpdateProjectDto,
     @UploadedFiles()
@@ -100,6 +110,12 @@ export class ProjectController {
       screenshotImages?: Express.Multer.File[];
     }
   ) {
+    // 토큰 검증
+    const token = auth?.split(" ")[1]; // 'Bearer xxx'
+    if (!this.authService.verifyToken(token)) {
+      throw new UnauthorizedException("관리자 권한이 없습니다.");
+    }
+
     // 파일이 제공된 경우 확장자 검증
     if (files?.featureImages?.length || files?.screenshotImages?.length) {
       this.validateFileExtensions([
@@ -116,7 +132,15 @@ export class ProjectController {
 
   // 프로젝트 포스트 삭제
   @Delete("/:id")
-  async deleteProject(@Param("id") id: string) {
+  async deleteProject(
+    @Headers("Authorization") auth: string,
+    @Param("id") id: string
+  ) {
+    // 토큰 검증
+    const token = auth?.split(" ")[1]; // 'Bearer xxx'
+    if (!this.authService.verifyToken(token)) {
+      throw new UnauthorizedException("관리자 권한이 없습니다.");
+    }
     return await this.projectService.deleteProject(id);
   }
 

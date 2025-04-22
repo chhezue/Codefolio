@@ -5,6 +5,7 @@ import ProjectFeatures from "../components/project/ProjectFeatures";
 import PageLayout from "../components/layout/PageLayout";
 import { api } from "../config/api";
 import { Project } from "../components/project/ProjectCard";
+import DeleteProjectModal from "../components/project/DeleteProjectModal";
 
 const ProjectPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +13,7 @@ const ProjectPost: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [projectData, setProjectData] = useState<Project | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -21,12 +23,10 @@ const ProjectPost: React.FC = () => {
         setLoading(true);
         const response = await axios.get(api.projectById(id));
         setProjectData(response.data);
+        setError(null);
       } catch (err) {
-        console.error(
-          "프로젝트 데이터를 가져오는 중 오류가 발생했습니다:",
-          err
-        );
-        setError("프로젝트를 불러오는 중 오류가 발생했습니다.");
+        console.error("프로젝트 정보를 불러오는 중 오류가 발생했습니다:", err);
+        setError("프로젝트 정보를 불러오는 데 실패했습니다.");
       } finally {
         setLoading(false);
       }
@@ -37,17 +37,38 @@ const ProjectPost: React.FC = () => {
 
   // 프로젝트 삭제 핸들러
   const handleDeleteProject = async () => {
-    if (!id || !window.confirm("정말로 이 프로젝트를 삭제하시겠습니까?")) {
-      return;
-    }
+    if (!id) return;
 
     try {
-      await axios.delete(api.deleteProject(id));
+      setLoading(true);
+      // 인증 토큰과 함께 삭제 요청 보내기
+      await axios.delete(api.deleteProject(id), {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+        },
+      });
+      
+      // 성공 메시지 표시
+      alert("프로젝트가 성공적으로 삭제되었습니다.");
+      // 프로젝트 목록 페이지로 이동
       navigate("/projects");
     } catch (err) {
       console.error("프로젝트 삭제 중 오류가 발생했습니다:", err);
-      alert("프로젝트 삭제에 실패했습니다.");
+      setError("프로젝트 삭제에 실패했습니다. 나중에 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+      setShowDeleteModal(false);
     }
+  };
+
+  // 삭제 모달 열기
+  const openDeleteModal = () => {
+    setShowDeleteModal(true);
+  };
+
+  // 삭제 모달 닫기
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
   };
 
   if (loading) {
@@ -96,6 +117,14 @@ const ProjectPost: React.FC = () => {
 
   return (
     <PageLayout>
+      {/* 삭제 확인 모달 컴포넌트 */}
+      <DeleteProjectModal
+        visible={showDeleteModal}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteProject}
+        projectTitle={projectData.title}
+      />
+      
       {/* 프로젝트 헤더 */}
       <div className="mb-12">
         <div className="flex justify-between items-start">
@@ -111,14 +140,17 @@ const ProjectPost: React.FC = () => {
               수정
             </Link>
             <button
-              onClick={handleDeleteProject}
-              className="inline-flex items-center px-3 py-1.5 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50"
+              onClick={openDeleteModal}
+              className="inline-flex items-center px-3 py-1.5 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+              aria-label="프로젝트 삭제"
+              title="이 프로젝트를 삭제합니다"
             >
               <i className="fas fa-trash-alt mr-1.5"></i>
               삭제
             </button>
           </div>
         </div>
+        
         <div className="mt-4 flex flex-wrap gap-2">
           {projectData.stack.map((tech, index) => (
             <span

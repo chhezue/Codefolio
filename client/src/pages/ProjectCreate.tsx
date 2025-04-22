@@ -363,6 +363,7 @@ const ProjectCreate: React.FC = () => {
       await axios.post(api.projects, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
       });
 
