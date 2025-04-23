@@ -1,9 +1,77 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import ProjectCard from "../components/project/ProjectCard";
-import { api } from "../config/api";
 import { Project } from "../components/project/ProjectCard";
+
+// 더미 데이터 추가
+const dummyProjects: Project[] = [
+  {
+    id: 1,
+    title: "포트폴리오 웹사이트",
+    description: "React와 Tailwind CSS를 사용한 개인 포트폴리오 웹사이트입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/3b82f6/FFFFFF?text=Portfolio+Website",
+    stack: ["React", "TypeScript", "Tailwind CSS"],
+    startDate: "2023-01-01",
+    endDate: "2023-02-15",
+    demo: "https://example.com/demo",
+    github: "https://github.com/example/portfolio",
+  },
+  {
+    id: 2,
+    title: "쇼핑몰 API 서버",
+    description: "NestJS로 구현한 쇼핑몰 백엔드 API 서버입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/4f46e5/FFFFFF?text=Shopping+API",
+    stack: ["NestJS", "TypeScript", "PostgreSQL"],
+    startDate: "2022-09-10",
+    endDate: "2022-12-20",
+    demo: null,
+    github: "https://github.com/example/shopping-api",
+  },
+  {
+    id: 3,
+    title: "일정 관리 앱",
+    description: "할 일과 일정을 관리할 수 있는 모바일 앱입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/16a34a/FFFFFF?text=Todo+App",
+    stack: ["React Native", "Redux", "Firebase"],
+    startDate: "2022-06-01",
+    endDate: "2022-08-15",
+    demo: "https://example.com/todo-demo",
+    github: "https://github.com/example/todo-app",
+  },
+  {
+    id: 4,
+    title: "채팅 애플리케이션",
+    description: "실시간 채팅이 가능한 웹 애플리케이션입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/dc2626/FFFFFF?text=Chat+App",
+    stack: ["React", "Node.js", "Socket.io"],
+    startDate: "2023-03-01",
+    endDate: "2023-04-15",
+    demo: "https://example.com/chat-demo",
+    github: "https://github.com/example/chat-app",
+  },
+  {
+    id: 5,
+    title: "날씨 정보 앱",
+    description: "현재 위치 기반 날씨 정보를 제공하는 모바일 앱입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/0284c7/FFFFFF?text=Weather+App",
+    stack: ["React Native", "Redux", "OpenWeatherMap API"],
+    startDate: "2022-11-01",
+    endDate: "2022-12-10",
+    demo: "https://example.com/weather-demo",
+    github: "https://github.com/example/weather-app",
+  },
+  {
+    id: 6,
+    title: "블로그 플랫폼",
+    description: "마크다운 기반의 콘텐츠 작성이 가능한 블로그 플랫폼입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/7c3aed/FFFFFF?text=Blog+Platform",
+    stack: ["Next.js", "MongoDB", "AWS S3"],
+    startDate: "2023-05-01",
+    endDate: "2023-06-20",
+    demo: "https://example.com/blog-demo",
+    github: "https://github.com/example/blog-platform",
+  }
+];
 
 const ProjectList: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -53,48 +121,15 @@ const ProjectList: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // API 연동
+  // API 연동 대신 더미 데이터 사용
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(api.projects);
-
-        // fetchProjects 함수 내부에 추가
-        if (response.data && response.data.items) {
-          setProjects(response.data.items);
-          setTotalPages(response.data.totalPages || 1);
-          setTotalItems(response.data.total || 0);
-        }
-
-        // 응답 데이터 구조 확인 및 처리
-        if (
-          response.data &&
-          response.data.items &&
-          Array.isArray(response.data.items)
-        ) {
-          setProjects(response.data.items);
-        } else if (Array.isArray(response.data)) {
-          // 기존 배열 형식 지원 유지
-          setProjects(response.data);
-        } else {
-          console.error("API 응답이 예상 형식이 아닙니다:", response.data);
-          setProjects([]);
-          setError("프로젝트 데이터 형식이 올바르지 않습니다.");
-        }
-      } catch (err) {
-        console.error(
-          "프로젝트 데이터를 가져오는 중 오류가 발생했습니다:",
-          err
-        );
-        setError("프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
-        setProjects([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
+    // 로딩 효과를 위한 지연
+    setTimeout(() => {
+      setProjects(dummyProjects);
+      setTotalItems(dummyProjects.length);
+      setTotalPages(Math.ceil(dummyProjects.length / projectsPerPage));
+      setLoading(false);
+    }, 500);
   }, []);
 
   // 필터 변경 시 첫 페이지로 이동

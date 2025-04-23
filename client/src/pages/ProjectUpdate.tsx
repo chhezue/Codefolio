@@ -5,6 +5,7 @@ import PageLayout from "../components/layout/PageLayout";
 import { api } from "../config/api";
 import FeatureForm from "../components/project/form/FeatureForm";
 import ScreenshotForm from "../components/project/form/ScreenshotForm";
+import ChallengeForm from "../components/project/form/ChallengeForm";
 
 const ProjectUpdate: React.FC = () => {
   const navigate = useNavigate();
@@ -93,7 +94,7 @@ const ProjectUpdate: React.FC = () => {
 
   // 기본 정보 입력 핸들러
   const handleBasicInfoChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setBasicInfo((prev) => ({
@@ -154,21 +155,23 @@ const ProjectUpdate: React.FC = () => {
 
   // 도전 과제 추가
   const handleAddChallenge = () => {
-    setChallenges((prev) => [
-      ...prev,
-      {
-        number: prev.length + 1,
-        title: "",
-        description: "",
-      },
-    ]);
+    if (challenges.length < 3) {
+      setChallenges((prev) => [
+        ...prev,
+        {
+          number: prev.length + 1,
+          title: "",
+          description: "",
+        },
+      ]);
+    }
   };
 
   // 도전 과제 입력 핸들러
   const handleChallengeChange = (
     index: number,
     field: string,
-    value: string,
+    value: string
   ) => {
     setChallenges((prev) => {
       const updated = [...prev];
@@ -223,7 +226,7 @@ const ProjectUpdate: React.FC = () => {
   const handleFileUpload = (
     event: ChangeEvent<HTMLInputElement>,
     type: "feature" | "screenshot",
-    index: number,
+    index: number
   ) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
@@ -238,7 +241,7 @@ const ProjectUpdate: React.FC = () => {
           handleScreenshotChange(
             index,
             "imagePreview",
-            reader.result as string,
+            reader.result as string
           );
         }
       };
@@ -250,14 +253,14 @@ const ProjectUpdate: React.FC = () => {
   // ref 설정 함수
   const setFeatureFileInputRef = (
     el: HTMLInputElement | null,
-    index: number,
+    index: number
   ) => {
     featureFileInputRefs.current[index] = el;
   };
 
   const setScreenshotFileInputRef = (
     el: HTMLInputElement | null,
-    index: number,
+    index: number
   ) => {
     screenshotFileInputRefs.current[index] = el;
   };
@@ -292,15 +295,15 @@ const ProjectUpdate: React.FC = () => {
 
       // 필터링: 빈 항목 제거
       const validFeatures = features.filter(
-        (item) => item.imageFile !== null && item.title.trim() !== "",
+        (item) => item.imageFile !== null && item.title.trim() !== ""
       );
 
       const validScreenshots = screenshots.filter(
-        (item) => item.imageFile !== null && item.imageAlt.trim() !== "",
+        (item) => item.imageFile !== null && item.imageAlt.trim() !== ""
       );
 
       const validChallenges = challenges.filter(
-        (item) => item.title.trim() !== "" && item.description.trim() !== "",
+        (item) => item.title.trim() !== "" && item.description.trim() !== ""
       );
 
       if (validFeatures.length === 0) {
@@ -340,7 +343,10 @@ const ProjectUpdate: React.FC = () => {
       // 스크린샷 추가
       validScreenshots.forEach((screenshot, index) => {
         formData.append(`screenshots[${index}][imageAlt]`, screenshot.imageAlt);
-        formData.append(`screenshots[${index}][description]`, screenshot.description || "");
+        formData.append(
+          `screenshots[${index}][description]`,
+          screenshot.description || ""
+        );
         if (screenshot.imageFile) {
           formData.append(`screenshots[${index}][image]`, screenshot.imageFile);
         }
@@ -350,12 +356,12 @@ const ProjectUpdate: React.FC = () => {
       validChallenges.forEach((challenge, index) => {
         formData.append(
           `challenges[${index}][number]`,
-          challenge.number.toString(),
+          challenge.number.toString()
         );
         formData.append(`challenges[${index}][title]`, challenge.title);
         formData.append(
           `challenges[${index}][description]`,
-          challenge.description,
+          challenge.description
         );
       });
 
@@ -375,7 +381,7 @@ const ProjectUpdate: React.FC = () => {
       } else {
         console.error("프로젝트 등록 중 오류가 발생했습니다:", err);
         setError(
-          "프로젝트를 등록하는 중 오류가 발생했습니다. 다시 시도해주세요.",
+          "프로젝트를 등록하는 중 오류가 발생했습니다. 다시 시도해주세요."
         );
       }
     } finally {
@@ -603,82 +609,12 @@ const ProjectUpdate: React.FC = () => {
           />
 
           {/* 도전 과제 섹션 */}
-          <section className="mb-14">
-            <div className="flex justify-between items-center mb-8 pb-3 border-b border-gray-100">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                기술적 도전과 해결과정
-              </h2>
-              <button
-                type="button"
-                onClick={handleAddChallenge}
-                className="px-4 py-2 text-sm font-medium rounded-lg text-accent-500 bg-accent-50 hover:bg-accent-100 transition-colors"
-              >
-                + 도전 과제 추가
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              {challenges.map((challenge, index) => (
-                <div
-                  key={index}
-                  className="p-7 bg-gray-50 rounded-xl relative hover:bg-gray-100/50 transition-all shadow-sm"
-                >
-                  {challenges.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveChallenge(index)}
-                      className="absolute top-5 right-5 text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
-                  )}
-
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0">
-                          <span className="flex items-center justify-center h-10 w-10 rounded-full bg-accent-500 text-white font-medium shadow-sm">
-                            {challenge.number}
-                          </span>
-                        </div>
-                        <input
-                          type="text"
-                          value={challenge.title}
-                          onChange={(e) =>
-                            handleChallengeChange(
-                              index,
-                              "title",
-                              e.target.value,
-                            )
-                          }
-                          className="flex-1 px-5 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
-                          placeholder="도전 과제 제목"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="pl-14">
-                      <textarea
-                        value={challenge.description}
-                        onChange={(e) =>
-                          handleChallengeChange(
-                            index,
-                            "description",
-                            e.target.value,
-                          )
-                        }
-                        className="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-colors"
-                        rows={3}
-                        placeholder="도전 과제에 대한 자세한 설명과 해결 과정"
-                        required
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <ChallengeForm
+            challenges={challenges}
+            handleChallengeChange={handleChallengeChange}
+            handleRemoveChallenge={handleRemoveChallenge}
+            handleAddChallenge={handleAddChallenge}
+          />
 
           {/* 고정 프로젝트 체크박스 */}
           <div className="flex items-center mb-8 p-5 bg-accent-50 rounded-xl">

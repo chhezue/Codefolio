@@ -1,35 +1,41 @@
 import React from "react";
 
 export interface Project {
-  id: string;
+  id: string | number;
   title: string;
   description: string;
-  role: string;
-  periodStart: Date;
-  periodEnd: Date;
-  stack: string[];
-  pin: boolean;
-  features: {
+  thumbnail?: string;
+  tags?: string[];
+  stack?: string[];
+  startDate?: string;
+  endDate?: string;
+  demo?: string | null;
+  github?: string | null;
+  role?: string;
+  periodStart?: Date;
+  periodEnd?: Date;
+  pin?: boolean;
+  features?: {
     title: string;
     description: string;
     imageUrl?: string;
   }[];
-  techChallenges: {
+  techChallenges?: {
     title: string;
     description: string;
   }[];
-  screenshots: {
+  screenshots?: {
     imageUrl: string;
     description?: string;
   }[];
-  documents: {
+  documents?: {
     type: "GITHUB" | "DOC" | "STATS";
     title: string;
     icon?: string;
     link: string;
   }[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface ProjectCardProps {
@@ -38,9 +44,13 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const thumbnailImage =
+    project.thumbnail ||
     project.screenshots?.[0]?.imageUrl ||
     project.features?.[0]?.imageUrl ||
     "/placeholder-project.jpg";
+
+  // 태그와 스택 통합
+  const technologies = project.tags || project.stack || [];
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:border-slate-400 h-full">
@@ -62,7 +72,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 
         {/* 기술 스택 */}
         <div className="flex flex-wrap gap-2">
-          {project.stack.map((tech, index) => (
+          {technologies.map((tech, index) => (
             <span
               key={index}
               className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-full hover:bg-indigo-100 hover:text-indigo-800 transition-colors"

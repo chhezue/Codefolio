@@ -1,9 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import ProjectCard from "./ProjectCard";
 import { Project } from "./ProjectCard";
-import { api } from "../../config/api";
+
+// 더미 데이터 추가
+const dummyProjects: Project[] = [
+  {
+    id: 1,
+    title: "포트폴리오 웹사이트",
+    description: "React와 Tailwind CSS를 사용한 개인 포트폴리오 웹사이트입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/3b82f6/FFFFFF?text=Portfolio+Website",
+    tags: ["React", "TypeScript", "Tailwind CSS"],
+    startDate: "2023-01-01",
+    endDate: "2023-02-15",
+    demo: "https://example.com/demo",
+    github: "https://github.com/example/portfolio",
+  },
+  {
+    id: 2,
+    title: "쇼핑몰 API 서버",
+    description: "NestJS로 구현한 쇼핑몰 백엔드 API 서버입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/4f46e5/FFFFFF?text=Shopping+API",
+    tags: ["NestJS", "TypeScript", "PostgreSQL"],
+    startDate: "2022-09-10",
+    endDate: "2022-12-20",
+    demo: null,
+    github: "https://github.com/example/shopping-api",
+  },
+  {
+    id: 3,
+    title: "일정 관리 앱",
+    description: "할 일과 일정을 관리할 수 있는 모바일 앱입니다.",
+    thumbnail: "https://via.placeholder.com/400x250/16a34a/FFFFFF?text=Todo+App",
+    tags: ["React Native", "Redux", "Firebase"],
+    startDate: "2022-06-01",
+    endDate: "2022-08-15",
+    demo: "https://example.com/todo-demo",
+    github: "https://github.com/example/todo-app",
+  }
+];
 
 const PinnedProjects: React.FC = () => {
   const [pinnedProjects, setPinnedProjects] = useState<Project[]>([]);
@@ -11,39 +46,11 @@ const PinnedProjects: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPinnedProjects = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(api.pinnedProjects);
-
-        // 응답 데이터 구조 확인 및 처리
-        if (
-          response.data &&
-          response.data.items &&
-          Array.isArray(response.data.items)
-        ) {
-          setPinnedProjects(response.data.items);
-        } else if (Array.isArray(response.data)) {
-          // 기존 배열 형식 지원 유지
-          setPinnedProjects(response.data);
-        } else {
-          console.error("API 응답이 예상 형식이 아닙니다:", response.data);
-          setPinnedProjects([]);
-          setError("고정된 프로젝트 데이터 형식이 올바르지 않습니다.");
-        }
-      } catch (err) {
-        console.error(
-          "고정된 프로젝트 데이터를 가져오는 중 오류가 발생했습니다:",
-          err
-        );
-        setError("고정된 프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
-        setPinnedProjects([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPinnedProjects();
+    // API 호출 대신 더미 데이터 사용
+    setTimeout(() => {
+      setPinnedProjects(dummyProjects);
+      setLoading(false);
+    }, 500); // 로딩 효과를 위한 지연 시간
   }, []);
 
   if (loading) {

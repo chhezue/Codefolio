@@ -72,16 +72,4 @@ export class Project {
     imageUrl: string; // 스크린샷 이미지 URL
     description?: string; // 스크린샷 설명 (선택사항)
   }[];
-
-  /**
-   * 프로젝트 관련 문서 정보
-   * GitHub 저장소, 기술 문서, 통계 정보 등의 링크를 포함합니다.
-   */
-  @Column({ type: "jsonb" })
-  documents: {
-    type: "GITHUB" | "DOC" | "STATS"; // 문서 유형
-    title: string; // 문서 제목
-    icon?: string; // 문서 아이콘 (선택사항)
-    link: string; // 문서 링크 URL
-  }[];
 }

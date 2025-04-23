@@ -101,6 +101,7 @@ const FeatureForm: React.FC<FeatureFormProps> = ({
               <ImageUploader
                 imagePreview={feature.imagePreview}
                 imageAlt={feature.imageAlt}
+                description=""
                 onImageChange={(file) => {
                   handleFeatureChange(index, "imageFile", file);
                   const reader = new FileReader();

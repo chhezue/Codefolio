@@ -4,6 +4,8 @@ import {
   IsDateString,
   IsOptional,
   IsString,
+  MaxLength,
+  MinLength,
   ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
@@ -47,26 +49,7 @@ class ScreenshotDto {
   imageUrl: string; // 스크린샷 이미지 URL
 
   @IsString()
-  @IsOptional()
   description: string; // 스크린샷에 대한 설명 (선택사항)
-}
-
-/**
- * 프로젝트 관련 문서 정보를 정의하는 DTO
- */
-class DocumentDto {
-  @IsString()
-  type: "GITHUB" | "DOC" | "STATS"; // 문서 유형: GitHub, 일반 문서, 통계 정보
-
-  @IsString()
-  title: string; // 문서 제목
-
-  @IsString()
-  @IsOptional()
-  icon?: string; // 문서 아이콘 (선택사항)
-
-  @IsString()
-  link: string; // 문서 링크 URL
 }
 
 /**
@@ -96,22 +79,23 @@ export class CreateProjectDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FeatureDto)
+  @MinLength(1)
+  @MaxLength(3)
   features: FeatureDto[]; // 프로젝트의 주요 기능들
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TechChallengeDto)
+  @MinLength(1)
+  @MaxLength(3)
   techChallenges: TechChallengeDto[]; // 기술적 도전과 해결 과정
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ScreenshotDto)
+  @MinLength(1)
+  @MaxLength(3)
   screenshots: ScreenshotDto[]; // 프로젝트 스크린샷
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => DocumentDto)
-  documents: DocumentDto[]; // 프로젝트 관련 문서
 
   @IsBoolean()
   @IsOptional()
@@ -163,14 +147,7 @@ export class UpdateProjectDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ScreenshotDto)
-  @IsOptional()
   screenshots?: ScreenshotDto[]; // 스크린샷 (선택적)
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => DocumentDto)
-  @IsOptional()
-  documents?: DocumentDto[]; // 문서 (선택적)
 
   @IsBoolean()
   @IsOptional()
@@ -192,7 +169,6 @@ export class GetProjectDto {
   features: FeatureDto[]; // 주요 기능
   techChallenges: TechChallengeDto[]; // 기술적 도전과 해결 과정
   screenshots: ScreenshotDto[]; // 실제 구현 화면 (최대 3개)
-  documents: DocumentDto[]; // 프로젝트 문서 (GitHub, 기술 문서, 통계 등)
   pin: boolean; // 고정 여부
   createdAt: Date; // 생성 시간
   updatedAt: Date; // 업데이트 시간
