@@ -366,7 +366,7 @@ const ProjectCreate: React.FC = () => {
       });
 
       // API 호출
-      await axios.post(api.projects, formData, {
+      await axios.post(api.createProject, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
