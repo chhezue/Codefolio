@@ -21,6 +21,7 @@
     "paths": {
       "@project/*": ["src/modules/project/*"],
       "@mail/*": ["src/modules/mail/*"],
+      "@auth/*": ["src/modules/auth/*"],
       "@config/*": ["src/config/*"],
     }
   },

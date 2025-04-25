@@ -6,6 +6,9 @@ export const api = {
 
   // 프로젝트 관련 엔드포인트
   projects: `${API_URL}/projects`,
+  getProjects: (page: number = 1, limit: number = 10, stack?: string) =>
+    `${API_URL}/projects?page=${page}&limit=${limit}${stack ? `&stack=${stack}` : ""}`,
+  getStacks: `${API_URL}/projects/stacks`,
   projectById: (id: string) => `${API_URL}/projects/${id}`,
   pinnedProjects: `${API_URL}/projects/pin`,
   createProject: `${API_URL}/projects`,

@@ -17,21 +17,30 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ProjectService } from "@project/project.service";
 import { CreateProjectDto, UpdateProjectDto } from "@project/dto/project.dto";
 import { projectMulterOptions } from "@config/multer.config";
+import {AuthService} from "@auth/auth.service";
 
 // 허용되는 이미지 파일 확장자 목록
 const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg"];
 
 @Controller("projects")
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(private readonly projectService: ProjectService,
+              private readonly authService: AuthService) {}
 
   // 모든 프로젝트 포스트 출력
   @Get()
   async getProjects(
     @Query("page") page: number = 1,
-    @Query("limit") limit: number = 10
+    @Query("limit") limit: number = 10,
+    @Query("stack") stack?: string
   ) {
-    return this.projectService.getProjects(page, limit);
+    return this.projectService.getProjects(page, limit, stack);
+  }
+
+  // 모든 기술 스택 반환
+  @Get("/stacks")
+  async getStacks() {
+    return this.projectService.getStacks();
   }
 
   // 메인 페이지용 핀된 프로젝트 출력

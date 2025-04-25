@@ -4,11 +4,10 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, In } from "typeorm";
 import { Project } from "@project/project.entity";
 import {
   CreateProjectDto,
-  GetProjectDto,
   UpdateProjectDto,
 } from "@project/dto/project.dto";
 
@@ -19,22 +18,51 @@ export class ProjectService {
     private readonly projectRepository: Repository<Project>
   ) {}
 
-  async getProjects(page: number, limit: number) {
-    const [items, total] = await this.projectRepository.findAndCount({
+  async getProjects(page: number, limit: number, stack?: string) {
+    // 쿼리 조건 설정
+    const queryOptions: any = {
       skip: (page - 1) * limit,
       take: limit,
       order: { createdAt: "DESC" },
-    });
+    };
 
+    // 스택 필터링 적용
+    if (stack) {
+      const stacksArray = stack.split(",");
+      queryOptions.where = {
+        stack: In(stacksArray),
+      };
+    }
+
+    // 쿼리 실행
+    const [items, total] =
+      await this.projectRepository.findAndCount(queryOptions);
+
+    // 결과 반환
     return {
       items,
       total,
       page,
+      limit,
       totalPages: Math.ceil(total / limit),
     };
   }
 
-  async getPinnedProjects(): Promise<GetProjectDto[]> {
+  async getStacks() {
+    // 모든 프로젝트에서 stack 필드만 가져옴
+    const projects = await this.projectRepository.find({
+      select: ["stack"],
+    });
+
+    // 모든 프로젝트의 스택을 하나의 배열로 펼치고 중복 제거
+    const allStacks = projects.flatMap((project) => project.stack);
+    const uniqueStacks = [...new Set(allStacks)];
+
+    // 정렬된 스택 목록 반환
+    return uniqueStacks.sort();
+  }
+
+  async getPinnedProjects(): Promise<Project[]> {
     const projects = await this.projectRepository.find({
       where: { pin: true },
       take: 3,
@@ -47,7 +75,7 @@ export class ProjectService {
     return projects;
   }
 
-  async getProject(id: string): Promise<GetProjectDto> {
+  async getProject(id: string): Promise<Project> {
     const project = await this.projectRepository.findOne({ where: { id } });
     if (!project) {
       throw new NotFoundException(`${id} 프로젝트를 찾을 수 없습니다.`);
@@ -62,7 +90,7 @@ export class ProjectService {
       featureImages: Express.Multer.File[];
       screenshotImages: Express.Multer.File[];
     }
-  ): Promise<GetProjectDto> {
+  ): Promise<Project> {
     // 고정 3개 검증 로직 실행
     if (createProjectDto.pin) {
       await this.validatePinLimit();
@@ -99,7 +127,7 @@ export class ProjectService {
       featureImages?: Express.Multer.File[];
       screenshotImages?: Express.Multer.File[];
     }
-  ): Promise<GetProjectDto> {
+  ): Promise<Project> {
     // 고정 3개 검증 로직 실행
     if (updateProjectDto.pin) {
       const project = await this.projectRepository.findOne({ where: { id } });
@@ -130,10 +158,17 @@ export class ProjectService {
       features,
       screenshots,
     });
+
+    // 업데이트된 프로젝트 찾아서 반환
     const updatedProject = await this.projectRepository.findOne({
       where: { id },
     });
-    return updatedProject ?? null;
+
+    if (!updatedProject) {
+      throw new NotFoundException(`${id} 프로젝트를 찾을 수 없습니다.`);
+    }
+
+    return updatedProject;
   }
 
   async deleteProject(id: string) {

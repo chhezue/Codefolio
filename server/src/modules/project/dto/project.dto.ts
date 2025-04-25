@@ -153,23 +153,3 @@ export class UpdateProjectDto {
   @IsOptional()
   pin?: boolean; // 고정 여부 (선택적)
 }
-
-/**
- * 프로젝트 조회 결과를 위한 DTO
- * 프로젝트의 모든 정보를 포함하며 응답으로 사용됩니다.
- */
-export class GetProjectDto {
-  id: string; // 프로젝트 고유 ID
-  title: string; // 프로젝트 제목
-  description: string; // 프로젝트 설명
-  role: string; // 맡은 역할
-  periodStart: Date; // 시작 기간
-  periodEnd: Date; // 종료 기간
-  stack: string[]; // 사용 기술 스택
-  features: FeatureDto[]; // 주요 기능
-  techChallenges: TechChallengeDto[]; // 기술적 도전과 해결 과정
-  screenshots: ScreenshotDto[]; // 실제 구현 화면 (최대 3개)
-  pin: boolean; // 고정 여부
-  createdAt: Date; // 생성 시간
-  updatedAt: Date; // 업데이트 시간
-}
