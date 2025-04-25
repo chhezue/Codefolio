@@ -1,5 +1,5 @@
-import React, { ChangeEvent, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { ChangeEvent, useRef, useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import PageLayout from "../components/layout/PageLayout";
 import { api } from "../config/api";
@@ -9,7 +9,9 @@ import ChallengeForm from "../components/project/form/ChallengeForm";
 
 const ProjectUpdate: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pin, setPin] = useState(false);
 
@@ -69,6 +71,104 @@ const ProjectUpdate: React.FC = () => {
   // File input refs
   const featureFileInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const screenshotFileInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  // 기존 프로젝트 데이터 로드
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      if (!id) {
+        navigate("/projects");
+        return;
+      }
+
+      try {
+        const response = await axios.get(api.projectById(id), {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+          },
+        });
+
+        const projectData = response.data;
+
+        // 기본 정보 설정
+        setBasicInfo({
+          title: projectData.title || "",
+          summary: projectData.description || "",
+          githubUrl: projectData.githubUrl || "",
+          startDate: projectData.periodStart
+            ? new Date(projectData.periodStart).toISOString().split("T")[0]
+            : "",
+          endDate: projectData.periodEnd
+            ? new Date(projectData.periodEnd).toISOString().split("T")[0]
+            : "",
+          role: projectData.role || "",
+          pin: projectData.pin || false,
+        });
+
+        // 고정 상태 설정
+        setPin(projectData.pin || false);
+
+        // 기술 스택 설정
+        if (projectData.stack && Array.isArray(projectData.stack)) {
+          setTechnologies(projectData.stack);
+        }
+
+        // 기능 목록 설정
+        if (projectData.features && Array.isArray(projectData.features)) {
+          const mappedFeatures = projectData.features.map((feature: any) => ({
+            title: feature.title || "",
+            description: feature.description || "",
+            imageFile: null,
+            imagePreview: feature.imageUrl || "",
+            imageAlt: feature.imageAlt || "",
+          }));
+          setFeatures(mappedFeatures.length > 0 ? mappedFeatures : features);
+        }
+
+        // 스크린샷 목록 설정
+        if (projectData.screenshots && Array.isArray(projectData.screenshots)) {
+          const mappedScreenshots = projectData.screenshots.map(
+            (screenshot: any) => ({
+              imageFile: null,
+              imagePreview: screenshot.imageUrl || "",
+              imageAlt: screenshot.imageAlt || "",
+              description: screenshot.description || "",
+            })
+          );
+          setScreenshots(
+            mappedScreenshots.length > 0 ? mappedScreenshots : screenshots
+          );
+        }
+
+        // 도전 과제 목록 설정
+        if (
+          projectData.techChallenges &&
+          Array.isArray(projectData.techChallenges)
+        ) {
+          const mappedChallenges = projectData.techChallenges.map(
+            (challenge: any, index: number) => ({
+              number: index + 1,
+              title: challenge.title || "",
+              description: challenge.description || "",
+            })
+          );
+          setChallenges(
+            mappedChallenges.length > 0 ? mappedChallenges : challenges
+          );
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error(
+          "프로젝트 데이터를 불러오는 중 오류가 발생했습니다:",
+          err
+        );
+        setError("프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjectData();
+  }, [id, navigate]);
 
   // 날짜 변환 함수
   const formatDateString = (dateString: string): string => {
@@ -295,11 +395,15 @@ const ProjectUpdate: React.FC = () => {
 
       // 필터링: 빈 항목 제거
       const validFeatures = features.filter(
-        (item) => item.imageFile !== null && item.title.trim() !== ""
+        (item) =>
+          (item.imageFile !== null || item.imagePreview !== "") &&
+          item.title.trim() !== ""
       );
 
       const validScreenshots = screenshots.filter(
-        (item) => item.imageFile !== null && item.imageAlt.trim() !== ""
+        (item) =>
+          (item.imageFile !== null || item.imagePreview !== "") &&
+          item.imageAlt.trim() !== ""
       );
 
       const validChallenges = challenges.filter(
@@ -317,17 +421,17 @@ const ProjectUpdate: React.FC = () => {
       // FormData 생성 및 데이터 추가
       const formData = new FormData();
       formData.append("title", basicInfo.title);
-      formData.append("summary", basicInfo.summary);
+      formData.append("description", basicInfo.summary); // 백엔드는 'description' 필드 사용
       formData.append("githubUrl", basicInfo.githubUrl);
-      formData.append("startDate", basicInfo.startDate);
-      formData.append("endDate", basicInfo.endDate);
+      formData.append("periodStart", basicInfo.startDate); // 백엔드는 'periodStart' 필드 사용
+      formData.append("periodEnd", basicInfo.endDate); // 백엔드는 'periodEnd' 필드 사용
       formData.append("period", getProjectPeriod()); // 형식화된 기간 문자열 추가
       formData.append("role", basicInfo.role);
       formData.append("pin", pin.toString()); // 고정 여부 추가
 
-      // 기술 스택 추가
+      // 기술 스택 추가 (백엔드는 'stack' 필드 사용)
       technologies.forEach((tech, index) => {
-        formData.append(`technologies[${index}]`, tech);
+        formData.append(`stack[${index}]`, tech);
       });
 
       // 기능 추가
@@ -336,7 +440,7 @@ const ProjectUpdate: React.FC = () => {
         formData.append(`features[${index}][description]`, feature.description);
         formData.append(`features[${index}][imageAlt]`, feature.imageAlt);
         if (feature.imageFile) {
-          formData.append(`features[${index}][image]`, feature.imageFile);
+          formData.append(`featureImages[${index}]`, feature.imageFile);
         }
       });
 
@@ -348,25 +452,29 @@ const ProjectUpdate: React.FC = () => {
           screenshot.description || ""
         );
         if (screenshot.imageFile) {
-          formData.append(`screenshots[${index}][image]`, screenshot.imageFile);
+          formData.append(`screenshotImages[${index}]`, screenshot.imageFile);
         }
       });
 
-      // 도전 과제 추가
+      // 도전 과제 추가 (백엔드는 'techChallenges' 필드 사용)
       validChallenges.forEach((challenge, index) => {
         formData.append(
-          `challenges[${index}][number]`,
+          `techChallenges[${index}][number]`,
           challenge.number.toString()
         );
-        formData.append(`challenges[${index}][title]`, challenge.title);
+        formData.append(`techChallenges[${index}][title]`, challenge.title);
         formData.append(
-          `challenges[${index}][description]`,
+          `techChallenges[${index}][description]`,
           challenge.description
         );
       });
 
       // API 호출
-      await axios.post(api.createProject, formData, {
+      if (!id) {
+        throw new Error("프로젝트 ID가 유효하지 않습니다.");
+      }
+
+      await axios.put(api.updateProject(id), formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
@@ -379,9 +487,9 @@ const ProjectUpdate: React.FC = () => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        console.error("프로젝트 등록 중 오류가 발생했습니다:", err);
+        console.error("프로젝트 수정 중 오류가 발생했습니다:", err);
         setError(
-          "프로젝트를 등록하는 중 오류가 발생했습니다. 다시 시도해주세요."
+          "프로젝트를 수정하는 중 오류가 발생했습니다. 다시 시도해주세요."
         );
       }
     } finally {
@@ -396,6 +504,19 @@ const ProjectUpdate: React.FC = () => {
       handleAddTechnology();
     }
   };
+
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent-500 mb-4"></div>
+            <p className="text-gray-600">프로젝트 데이터를 불러오는 중...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
