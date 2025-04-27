@@ -8,7 +8,7 @@ const ProjectList: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState("all");
+  const [selectedStack, setSelectedStack] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const projectsPerPage = 9; // 페이지당 프로젝트 수
   const [totalPages, setTotalPages] = useState(0);
@@ -17,17 +17,20 @@ const ProjectList: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // API에서 프로젝트 가져오기
-  const fetchProjects = async (
-    page = 1,
-    limit = projectsPerPage,
-    stack?: string
-  ) => {
+  const fetchProjects = async () => {
     try {
       setLoading(true);
-      const response = await fetch(api.getProjects(page, limit, stack));
+      const url = new URL(api.projects);
+      url.searchParams.append("page", currentPage.toString());
+      url.searchParams.append("limit", projectsPerPage.toString());
+      if (selectedStack) {
+        url.searchParams.append("stack", selectedStack);
+      }
+
+      const response = await fetch(url.toString());
 
       if (!response.ok) {
-        throw new Error("프로젝트를 불러오는데 실패했습니다.");
+        throw new Error("프로젝트 목록을 불러오는데 실패했습니다.");
       }
 
       const data = await response.json();
@@ -35,11 +38,11 @@ const ProjectList: React.FC = () => {
       setTotalItems(data.total);
       setTotalPages(data.totalPages);
       setCurrentPage(data.page);
-      setLoading(false);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
       );
+    } finally {
       setLoading(false);
     }
   };
@@ -72,25 +75,23 @@ const ProjectList: React.FC = () => {
     setIsLoggedIn(!!token);
   }, []);
 
-  // 필터 변경 시 프로젝트 다시 로드
-  useEffect(() => {
-    if (filter === "all") {
-      fetchProjects(1, projectsPerPage);
-    } else {
-      fetchProjects(1, projectsPerPage, filter);
-    }
-  }, [filter]);
+  // 필터 변경 핸들러
+  const handleStackChange = (stack: string | null) => {
+    setSelectedStack(stack);
+    setCurrentPage(1);
+  };
 
   // 페이지 변경 핸들러
   const handlePageChange = (pageNumber: number) => {
-    if (filter === "all") {
-      fetchProjects(pageNumber, projectsPerPage);
-    } else {
-      fetchProjects(pageNumber, projectsPerPage, filter);
-    }
+    setCurrentPage(pageNumber);
     // 페이지 상단으로 스크롤
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // 필터나 페이지 변경 시 프로젝트 다시 로드
+  useEffect(() => {
+    fetchProjects();
+  }, [selectedStack, currentPage]);
 
   if (loading && projects.length === 0) {
     return <div className="text-center py-6 text-slate-600">로딩 중...</div>;
@@ -119,9 +120,9 @@ const ProjectList: React.FC = () => {
       {/* 필터 버튼 */}
       <div className="flex flex-wrap justify-center gap-2 mb-10">
         <button
-          onClick={() => setFilter("all")}
+          onClick={() => handleStackChange(null)}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-            filter === "all"
+            !selectedStack
               ? "bg-indigo-600 text-white"
               : "bg-slate-100 text-slate-700 hover:bg-slate-200"
           }`}
@@ -131,9 +132,9 @@ const ProjectList: React.FC = () => {
         {allTechnologies.map((tech) => (
           <button
             key={tech}
-            onClick={() => setFilter(tech)}
+            onClick={() => handleStackChange(tech)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === tech
+              selectedStack === tech
                 ? "bg-indigo-600 text-white"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}

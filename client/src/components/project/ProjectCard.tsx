@@ -1,41 +1,43 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { API_URL } from "../../config/api";
 
 export interface Project {
-  id: string | number;
+  id: string;
   title: string;
-  description: string;
-  thumbnail?: string;
-  tags?: string[];
+  description?: string;
+  summary?: string;
+  periodStart?: string;
+  periodEnd?: string;
+  period?: string;
   stack?: string[];
-  startDate?: string;
-  endDate?: string;
-  demo?: string | null;
-  github?: string | null;
+  technologies?: string[];
+  tags?: string[];
   role?: string;
-  periodStart?: Date;
-  periodEnd?: Date;
   pin?: boolean;
+  githubUrl?: string;
   features?: {
+    id?: string;
     title: string;
     description: string;
     imageUrl?: string;
+    imageAlt?: string;
   }[];
-  techChallenges?: {
+  screenshots?: {
+    id?: string;
+    imageUrl?: string;
+    imageAlt?: string;
+    description?: string;
+  }[];
+  challenges?: {
+    id?: string;
+    number: number;
     title: string;
     description: string;
   }[];
-  screenshots?: {
-    imageUrl: string;
-    description?: string;
-  }[];
-  documents?: {
-    type: "GITHUB" | "DOC" | "STATS";
-    title: string;
-    icon?: string;
-    link: string;
-  }[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  thumbnail?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface ProjectCardProps {
@@ -43,6 +45,17 @@ interface ProjectCardProps {
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+  // 이미지 URL 처리 - 상대 경로인 경우 API_URL 추가
+  const getImageUrl = (url: string | undefined) => {
+    if (!url) return "";
+    // 이미지 URL이 /uploads로 시작하면 API_URL을 앞에 추가
+    if (url.startsWith("/uploads")) {
+      return `${API_URL}${url}`;
+    }
+    // 이미 절대 URL이거나 데이터 URL인 경우 그대로 사용
+    return url;
+  };
+
   const thumbnailImage =
     project.thumbnail ||
     project.screenshots?.[0]?.imageUrl ||
@@ -56,7 +69,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:border-slate-400 h-full">
       {/* 이미지 */}
       <img
-        src={thumbnailImage}
+        src={getImageUrl(thumbnailImage)}
         alt={project.title}
         className="w-full h-48 object-cover"
       />

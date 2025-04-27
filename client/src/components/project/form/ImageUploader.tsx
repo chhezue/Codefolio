@@ -1,4 +1,5 @@
 import React from "react";
+import { API_URL } from "../../../config/api";
 
 interface ImageUploaderProps {
   imagePreview: string;
@@ -8,7 +9,7 @@ interface ImageUploaderProps {
   isDescriptionRequired?: boolean;
   onImageChange: (file: File) => void;
   onAltChange: (alt: string) => void;
-  onDescriptionChange?: (description: string) => void;
+  onDescriptionChange?: (desc: string) => void;
   inputId: string;
   label: string;
   isRequired?: boolean;
@@ -33,6 +34,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
+  // 이미지 URL 처리 - 상대 경로인 경우 API_URL 추가
+  const getImageUrl = (url: string | undefined) => {
+    if (!url) return "";
+    // 이미지 URL이 /uploads로 시작하면 API_URL을 앞에 추가
+    if (url.startsWith("/uploads")) {
+      return `${API_URL}${url}`;
+    }
+    // 이미 절대 URL이거나 데이터 URL인 경우 그대로 사용
+    return url;
+  };
+
   return (
     <div>
       <label className="block text-gray-700 font-medium mb-2">
@@ -43,7 +55,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           {imagePreview ? (
             <div className="relative group">
               <img
-                src={imagePreview}
+                src={getImageUrl(imagePreview)}
                 alt={imageAlt || "이미지"}
                 className="w-full h-auto rounded-lg border border-gray-200"
               />
@@ -84,7 +96,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             onChange={handleFileChange}
           />
         </div>
-        {imagePreview && (
+
+        {(imagePreview || isRequired) && (
           <>
             <div className="w-full">
               <label className="block text-gray-700 font-medium mb-2">

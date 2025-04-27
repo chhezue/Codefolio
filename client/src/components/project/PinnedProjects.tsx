@@ -12,6 +12,9 @@ const PinnedProjects: React.FC = () => {
   useEffect(() => {
     const fetchPinnedProjects = async () => {
       try {
+        setLoading(true);
+        console.log("고정된 프로젝트 데이터 가져오기 시작");
+
         const response = await fetch(api.pinnedProjects);
 
         if (!response.ok) {
@@ -19,9 +22,16 @@ const PinnedProjects: React.FC = () => {
         }
 
         const data = await response.json();
-        setPinnedProjects(data.items || []);
+        console.log("서버에서 받은 고정 프로젝트 데이터:", data);
+
+        // 데이터 구조 확인 및 안전하게 처리
+        const projectItems = data.items || [];
+        setPinnedProjects(projectItems);
+        console.log(`${projectItems.length}개의 고정 프로젝트 로드 완료`);
+
         setLoading(false);
       } catch (err) {
+        console.error("고정 프로젝트 로드 중 오류:", err);
         setError(
           err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
         );

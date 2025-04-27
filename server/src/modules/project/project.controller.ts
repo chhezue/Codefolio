@@ -17,15 +17,17 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ProjectService } from "@project/project.service";
 import { CreateProjectDto, UpdateProjectDto } from "@project/dto/project.dto";
 import { projectMulterOptions } from "@config/multer.config";
-import {AuthService} from "@auth/auth.service";
+import { AuthService } from "@auth/auth.service";
 
 // 허용되는 이미지 파일 확장자 목록
 const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg"];
 
 @Controller("projects")
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService,
-              private readonly authService: AuthService) {}
+  constructor(
+    private readonly projectService: ProjectService,
+    private readonly authService: AuthService
+  ) {}
 
   // 모든 프로젝트 포스트 출력
   @Get()
@@ -45,8 +47,12 @@ export class ProjectController {
 
   // 메인 페이지용 핀된 프로젝트 출력
   @Get("/pin")
-  getPinnedProjects() {
-    return this.projectService.getPinnedProjects();
+  async getPinnedProjects() {
+    const pinnedProjects = await this.projectService.getPinnedProjects();
+    return {
+      items: pinnedProjects,
+      total: pinnedProjects.length,
+    };
   }
 
   // 특정 프로젝트 포스트 출력
@@ -75,27 +81,38 @@ export class ProjectController {
       screenshotImages?: Express.Multer.File[];
     }
   ) {
-    // 토큰 검증
-    const token = auth?.split(" ")[1]; // 'Bearer xxx'
-    if (!this.authService.verifyToken(token)) {
-      throw new UnauthorizedException("관리자 권한이 없습니다.");
+    try {
+      console.log("파일 수신 확인:", {
+        featureImages: files?.featureImages?.length || 0,
+        screenshotImages: files?.screenshotImages?.length || 0,
+      });
+
+      // 토큰 검증
+      const token = auth?.split(" ")[1]; // 'Bearer xxx'
+      if (!this.authService.verifyToken(token)) {
+        throw new UnauthorizedException("관리자 권한이 없습니다.");
+      }
+
+      // 필수 파일이 없는 경우 에러 처리
+      if (!files?.featureImages?.length || !files?.screenshotImages?.length) {
+        throw new BadRequestException("이미지는 필수입니다.");
+      }
+
+      // 파일 확장자 추가 검증
+      this.validateFileExtensions([
+        ...(files.featureImages || []),
+        ...(files.screenshotImages || []),
+      ]);
+
+      console.log("파일 검증 완료, 프로젝트 생성 시작");
+      return this.projectService.createProject(createDto, {
+        featureImages: files.featureImages,
+        screenshotImages: files.screenshotImages,
+      });
+    } catch (error) {
+      console.error("프로젝트 생성 중 오류 발생:", error);
+      throw error;
     }
-
-    // 필수 파일이 없는 경우 에러 처리
-    if (!files?.featureImages?.length || !files?.screenshotImages?.length) {
-      throw new BadRequestException("이미지는 필수입니다.");
-    }
-
-    // 파일 확장자 추가 검증
-    this.validateFileExtensions([
-      ...(files.featureImages || []),
-      ...(files.screenshotImages || []),
-    ]);
-
-    return this.projectService.createProject(createDto, {
-      featureImages: files.featureImages,
-      screenshotImages: files.screenshotImages,
-    });
   }
 
   // 프로젝트 포스트 수정
@@ -133,10 +150,7 @@ export class ProjectController {
       ]);
     }
 
-    return this.projectService.updateProject(id, updateProjectDto, {
-      featureImages: files.featureImages,
-      screenshotImages: files.screenshotImages,
-    });
+    return this.projectService.updateProject(id, updateProjectDto, files);
   }
 
   // 프로젝트 포스트 삭제

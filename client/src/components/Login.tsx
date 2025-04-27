@@ -18,10 +18,44 @@ function Login({ onSuccess }: { onSuccess: () => void }) {
 
     try {
       const res = await axios.post(api.login, { password });
-      localStorage.setItem("admin_token", res.data.token);
-      onSuccess();
-    } catch (err) {
-      setError("비밀번호가 틀렸습니다.");
+
+      if (res.data && res.data.token) {
+        console.log(
+          "로그인 성공, 토큰 수신:",
+          res.data.token.substring(0, 15) + "..."
+        );
+        localStorage.setItem("admin_token", res.data.token);
+
+        // 저장된 토큰 확인
+        const savedToken = localStorage.getItem("admin_token");
+        if (savedToken && savedToken === res.data.token) {
+          console.log("토큰이 로컬 스토리지에 올바르게 저장되었습니다.");
+          onSuccess();
+        } else {
+          console.error("토큰 저장 실패:", savedToken);
+          setError("로그인 토큰 저장에 실패했습니다. 다시 시도해주세요.");
+        }
+      } else {
+        setError("서버 응답 형식이 올바르지 않습니다.");
+      }
+    } catch (err: any) {
+      console.error("로그인 오류:", err);
+      if (err.response) {
+        // 서버에서 응답이 왔지만 오류 상태 코드인 경우
+        if (err.response.status === 401) {
+          setError("비밀번호가 틀렸습니다.");
+        } else {
+          setError(
+            `서버 오류: ${err.response.status} ${err.response.data?.message || ""}`
+          );
+        }
+      } else if (err.request) {
+        // 요청은 보냈지만 응답이 없는 경우 (서버 연결 문제)
+        setError("서버에 연결할 수 없습니다. 네트워크 연결을 확인해 주세요.");
+      } else {
+        // 요청 구성 중 오류가 발생한 경우
+        setError(`요청 오류: ${err.message}`);
+      }
     } finally {
       setIsLoading(false);
     }

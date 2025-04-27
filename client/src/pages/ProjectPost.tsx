@@ -4,7 +4,7 @@ import ProjectFeatures from "../components/project/ProjectFeatures";
 import PageLayout from "../components/layout/PageLayout";
 import { Project } from "../components/project/ProjectCard";
 import DeleteProjectModal from "../components/project/DeleteProjectModal";
-import { api } from "../config/api";
+import { api, API_URL } from "../config/api";
 
 const ProjectPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +14,17 @@ const ProjectPost: React.FC = () => {
   const [projectData, setProjectData] = useState<Project | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 이미지 URL 처리 - 상대 경로인 경우 API_URL 추가
+  const getImageUrl = (url: string | undefined) => {
+    if (!url) return "";
+    // 이미지 URL이 /uploads로 시작하면 API_URL을 앞에 추가
+    if (url.startsWith("/uploads")) {
+      return `${API_URL}${url}`;
+    }
+    // 이미 절대 URL이거나 데이터 URL인 경우 그대로 사용
+    return url;
+  };
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -34,6 +45,8 @@ const ProjectPost: React.FC = () => {
         }
 
         const data = await response.json();
+        console.log("서버에서 받은 프로젝트 데이터:", data);
+        console.log("도전 과제 데이터:", data.challenges);
         setProjectData(data);
         setLoading(false);
       } catch (err) {
@@ -172,7 +185,7 @@ const ProjectPost: React.FC = () => {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {projectData.stack?.map((tech, index) => (
+          {projectData.technologies?.map((tech, index) => (
             <span
               key={index}
               className="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full"
@@ -184,7 +197,9 @@ const ProjectPost: React.FC = () => {
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white shadow-sm rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow duration-200">
             <h3 className="text-sm font-medium text-gray-500">프로젝트 기간</h3>
-            <p className="mt-1 text-base text-gray-900">{formatPeriod()}</p>
+            <p className="mt-1 text-base text-gray-900">
+              {projectData.period || formatPeriod()}
+            </p>
           </div>
           <div className="bg-white shadow-sm rounded-lg p-5 border border-gray-100 hover:shadow-md transition-shadow duration-200">
             <h3 className="text-sm font-medium text-gray-500">담당 역할</h3>
@@ -198,7 +213,7 @@ const ProjectPost: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">프로젝트 개요</h2>
         <div className="prose max-w-none">
           <p className="text-gray-700 whitespace-pre-line">
-            {projectData.description}
+            {projectData.summary}
           </p>
         </div>
       </section>
@@ -206,25 +221,6 @@ const ProjectPost: React.FC = () => {
       {/* 주요 기능 섹션 */}
       {projectData.features && projectData.features.length > 0 && (
         <ProjectFeatures features={projectData.features} />
-      )}
-
-      {/* 기술적 도전 섹션 */}
-      {projectData.techChallenges && projectData.techChallenges.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            기술적 도전과 해결 과정
-          </h2>
-          <div className="space-y-6">
-            {projectData.techChallenges.map((challenge, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {index + 1}. {challenge.title}
-                </h3>
-                <p className="text-gray-600">{challenge.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
       )}
 
       {/* 실제 구현 화면 섹션 */}
@@ -237,8 +233,8 @@ const ProjectPost: React.FC = () => {
             {projectData.screenshots.map((screenshot, index) => (
               <div key={index} className="relative group">
                 <img
-                  src={screenshot.imageUrl}
-                  alt={screenshot.description || `스크린샷 ${index + 1}`}
+                  src={getImageUrl(screenshot.imageUrl)}
+                  alt={screenshot.imageAlt || `스크린샷 ${index + 1}`}
                   className="rounded-lg shadow-sm w-full h-auto"
                 />
                 {screenshot.description && (
@@ -252,6 +248,40 @@ const ProjectPost: React.FC = () => {
             ))}
           </div>
         </section>
+      )}
+
+      {/* 기술적 도전 섹션 */}
+      {projectData.challenges && projectData.challenges.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            기술적 도전과 해결 과정
+          </h2>
+          <div className="space-y-6">
+            {projectData.challenges.map((challenge, index) => (
+              <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {challenge.number}. {challenge.title}
+                </h3>
+                <p className="text-gray-600">{challenge.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* GitHub 링크 */}
+      {projectData.githubUrl && (
+        <div className="mt-12 text-center">
+          <a
+            href={projectData.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <i className="fab fa-github mr-2"></i>
+            GitHub
+          </a>
+        </div>
       )}
 
       {/* 네비게이션 버튼 */}

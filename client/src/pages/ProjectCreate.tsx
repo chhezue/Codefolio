@@ -336,7 +336,7 @@ const ProjectCreate: React.FC = () => {
         formData.append(`features[${index}][description]`, feature.description);
         formData.append(`features[${index}][imageAlt]`, feature.imageAlt);
         if (feature.imageFile) {
-          formData.append(`features[${index}][image]`, feature.imageFile);
+          formData.append("featureImages", feature.imageFile);
         }
       });
 
@@ -348,15 +348,17 @@ const ProjectCreate: React.FC = () => {
           screenshot.description || ""
         );
         if (screenshot.imageFile) {
-          formData.append(`screenshots[${index}][image]`, screenshot.imageFile);
+          formData.append("screenshotImages", screenshot.imageFile);
         }
       });
 
       // 도전 과제 추가
       validChallenges.forEach((challenge, index) => {
+        // number 값을 명시적으로 정수로 변환 후 추가
+        const challengeNumber = parseInt(challenge.number.toString(), 10);
         formData.append(
           `challenges[${index}][number]`,
-          challenge.number.toString()
+          challengeNumber.toString()
         );
         formData.append(`challenges[${index}][title]`, challenge.title);
         formData.append(
@@ -365,16 +367,70 @@ const ProjectCreate: React.FC = () => {
         );
       });
 
-      // API 호출
-      await axios.post(api.createProject, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-        },
+      // 디버깅: FormData의 도전 과제 number 값을 확인
+      validChallenges.forEach((challenge, index) => {
+        console.log(
+          `도전 과제 ${index} 번호:`,
+          challenge.number,
+          typeof challenge.number
+        );
+        console.log(
+          `FormData에 추가된 값:`,
+          parseInt(challenge.number.toString(), 10),
+          typeof parseInt(challenge.number.toString(), 10)
+        );
       });
 
-      // 성공 시 목록 페이지로 이동
-      navigate("/projects");
+      // 전체 FormData 디버깅
+      console.log("===== FormData 전체 내용 =====");
+      formData.forEach((value, key) => {
+        console.log(`${key}: ${value} (${typeof value})`);
+      });
+      console.log("=============================");
+
+      // API 호출
+      const token = localStorage.getItem("admin_token");
+      console.log(
+        "프로젝트 생성 요청 - 토큰 확인:",
+        token ? token.substring(0, 15) + "..." : "없음"
+      );
+
+      if (!token) {
+        setError("인증 토큰이 없습니다. 다시 로그인해주세요.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      try {
+        const response = await axios.post(api.createProject, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("API 응답:", response);
+        navigate("/projects");
+      } catch (err: any) {
+        console.error("API 오류 상세:", err);
+
+        if (err.response) {
+          if (err.response.status === 401) {
+            setError("관리자 인증에 실패했습니다. 다시 로그인해주세요.");
+            // 토큰 만료 가능성이 있으므로 토큰 삭제
+            localStorage.removeItem("admin_token");
+          } else {
+            setError(
+              `서버 오류: ${err.response.status} - ${err.response.data?.message || "알 수 없는 오류"}`
+            );
+          }
+        } else if (err.request) {
+          setError("서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.");
+        } else {
+          setError(`요청 오류: ${err.message}`);
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -384,8 +440,6 @@ const ProjectCreate: React.FC = () => {
           "프로젝트를 등록하는 중 오류가 발생했습니다. 다시 시도해주세요."
         );
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

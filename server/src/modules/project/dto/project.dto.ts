@@ -2,6 +2,8 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
@@ -20,25 +22,37 @@ import { Type } from "class-transformer";
  */
 class FeatureDto {
   @IsString()
+  @IsNotEmpty()
   title: string; // 기능의 제목/이름
 
   @IsString()
+  @IsNotEmpty()
   description: string; // 기능에 대한 상세 설명
 
   @IsString()
   @IsOptional()
-  imageUrl?: string; // 기능 관련 이미지 URL (선택사항)
+  imageAlt?: string; // 이미지 대체 텍스트 (선택사항)
+
+  @IsString()
+  @IsOptional()
+  imageUrl?: string; // 기능 관련 이미지 URL (서버에서 설정)
 }
 
 /**
- * 프로젝트 개발 중 마주친 기술적 도전과 해결책을 정의하는 DTO
+ * 프로젝트 개발 중 마주친 도전 과제를 정의하는 DTO
  */
-class TechChallengeDto {
-  @IsString()
-  title: string; // 기술적 도전의 제목
+class ChallengeDto {
+  @IsNumber()
+  @Type(() => Number) // 문자열로 전송된 값을 숫자로 자동 변환
+  number: number; // 도전 과제 번호
 
   @IsString()
-  description: string; // 도전 내용과 해결 방법에 대한 설명
+  @IsNotEmpty()
+  title: string; // 도전 과제 제목
+
+  @IsString()
+  @IsNotEmpty()
+  description: string; // 도전 과제 내용 설명
 }
 
 /**
@@ -46,60 +60,72 @@ class TechChallengeDto {
  */
 class ScreenshotDto {
   @IsString()
-  imageUrl: string; // 스크린샷 이미지 URL
+  @IsOptional()
+  imageAlt?: string; // 이미지 대체 텍스트
 
   @IsString()
-  description: string; // 스크린샷에 대한 설명 (선택사항)
+  @IsOptional()
+  description?: string; // 스크린샷에 대한 설명 (선택사항)
+
+  @IsString()
+  @IsOptional()
+  imageUrl?: string; // 스크린샷 이미지 URL (서버에서 설정)
 }
 
 /**
  * 프로젝트 생성 시 사용되는 DTO
- * 프로젝트의 모든 필수 정보를 포함합니다.
  */
 export class CreateProjectDto {
   @IsString()
+  @IsNotEmpty()
   title: string; // 프로젝트 제목
 
   @IsString()
-  description: string; // 프로젝트 상세 설명
+  @IsNotEmpty()
+  summary: string; // 프로젝트 요약 설명
 
   @IsString()
+  @IsNotEmpty()
+  githubUrl: string; // GitHub URL
+
+  @IsString()
+  @IsNotEmpty()
+  startDate: string; // 프로젝트 시작 날짜
+
+  @IsString()
+  @IsOptional()
+  endDate?: string; // 프로젝트 종료 날짜 (선택사항)
+
+  @IsString()
+  @IsOptional()
+  period?: string; // 형식화된 기간
+
+  @IsString()
+  @IsNotEmpty()
   role: string; // 프로젝트에서 맡은 역할
-
-  @IsDateString()
-  periodStart: Date; // 프로젝트 시작 날짜
-
-  @IsDateString()
-  periodEnd: Date; // 프로젝트 종료 날짜
 
   @IsArray()
   @IsString({ each: true })
-  stack: string[]; // 사용된 기술 스택 (예: "React", "TypeScript", "Node.js")
+  technologies: string[]; // 사용된 기술 스택
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FeatureDto)
-  @MinLength(1)
-  @MaxLength(3)
   features: FeatureDto[]; // 프로젝트의 주요 기능들
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => TechChallengeDto)
-  @MinLength(1)
-  @MaxLength(3)
-  techChallenges: TechChallengeDto[]; // 기술적 도전과 해결 과정
+  @Type(() => ChallengeDto)
+  challenges: ChallengeDto[]; // 도전 과제와 해결 과정
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ScreenshotDto)
-  @MinLength(1)
-  @MaxLength(3)
   screenshots: ScreenshotDto[]; // 프로젝트 스크린샷
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  pin?: boolean; // 프로젝트 고정 여부 (선택사항)
+  pin?: string; // 프로젝트 고정 여부 (문자열로 'true' 또는 'false')
 }
 
 /**
@@ -113,24 +139,32 @@ export class UpdateProjectDto {
 
   @IsString()
   @IsOptional()
-  description?: string; // 프로젝트 설명 (선택적)
+  summary?: string; // 프로젝트 요약 (선택적)
+
+  @IsString()
+  @IsOptional()
+  githubUrl?: string; // GitHub URL (선택적)
+
+  @IsString()
+  @IsOptional()
+  startDate?: string; // 시작 날짜 (선택적)
+
+  @IsString()
+  @IsOptional()
+  endDate?: string; // 종료 날짜 (선택적)
+
+  @IsString()
+  @IsOptional()
+  period?: string; // 형식화된 기간 (선택적)
 
   @IsString()
   @IsOptional()
   role?: string; // 맡은 역할 (선택적)
 
-  @IsDateString()
-  @IsOptional()
-  periodStart?: Date; // 시작 날짜 (선택적)
-
-  @IsDateString()
-  @IsOptional()
-  periodEnd?: Date; // 종료 날짜 (선택적)
-
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  stack?: string[]; // 기술 스택 (선택적)
+  technologies?: string[]; // 기술 스택 (선택적)
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -140,16 +174,17 @@ export class UpdateProjectDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => TechChallengeDto)
+  @Type(() => ChallengeDto)
   @IsOptional()
-  techChallenges?: TechChallengeDto[]; // 기술적 도전 (선택적)
+  challenges?: ChallengeDto[]; // 도전 과제 (선택적)
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ScreenshotDto)
+  @IsOptional()
   screenshots?: ScreenshotDto[]; // 스크린샷 (선택적)
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  pin?: boolean; // 고정 여부 (선택적)
+  pin?: string; // 고정 여부 (선택적, 문자열로 'true' 또는 'false')
 }

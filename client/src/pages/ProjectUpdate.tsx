@@ -81,6 +81,8 @@ const ProjectUpdate: React.FC = () => {
       }
 
       try {
+        console.log("프로젝트 데이터 가져오기 시작:", id);
+
         const response = await axios.get(api.projectById(id), {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
@@ -88,17 +90,18 @@ const ProjectUpdate: React.FC = () => {
         });
 
         const projectData = response.data;
+        console.log("서버에서 가져온 프로젝트 데이터:", projectData);
 
         // 기본 정보 설정
         setBasicInfo({
           title: projectData.title || "",
-          summary: projectData.description || "",
+          summary: projectData.summary || "",
           githubUrl: projectData.githubUrl || "",
-          startDate: projectData.periodStart
-            ? new Date(projectData.periodStart).toISOString().split("T")[0]
+          startDate: projectData.startDate
+            ? new Date(projectData.startDate).toISOString().split("T")[0]
             : "",
-          endDate: projectData.periodEnd
-            ? new Date(projectData.periodEnd).toISOString().split("T")[0]
+          endDate: projectData.endDate
+            ? new Date(projectData.endDate).toISOString().split("T")[0]
             : "",
           role: projectData.role || "",
           pin: projectData.pin || false,
@@ -108,12 +111,16 @@ const ProjectUpdate: React.FC = () => {
         setPin(projectData.pin || false);
 
         // 기술 스택 설정
-        if (projectData.stack && Array.isArray(projectData.stack)) {
-          setTechnologies(projectData.stack);
+        if (
+          projectData.technologies &&
+          Array.isArray(projectData.technologies)
+        ) {
+          setTechnologies(projectData.technologies);
         }
 
         // 기능 목록 설정
         if (projectData.features && Array.isArray(projectData.features)) {
+          console.log("기능 목록:", projectData.features);
           const mappedFeatures = projectData.features.map((feature: any) => ({
             title: feature.title || "",
             description: feature.description || "",
@@ -126,6 +133,7 @@ const ProjectUpdate: React.FC = () => {
 
         // 스크린샷 목록 설정
         if (projectData.screenshots && Array.isArray(projectData.screenshots)) {
+          console.log("스크린샷 목록:", projectData.screenshots);
           const mappedScreenshots = projectData.screenshots.map(
             (screenshot: any) => ({
               imageFile: null,
@@ -140,13 +148,11 @@ const ProjectUpdate: React.FC = () => {
         }
 
         // 도전 과제 목록 설정
-        if (
-          projectData.techChallenges &&
-          Array.isArray(projectData.techChallenges)
-        ) {
-          const mappedChallenges = projectData.techChallenges.map(
+        if (projectData.challenges && Array.isArray(projectData.challenges)) {
+          console.log("도전 과제 목록:", projectData.challenges);
+          const mappedChallenges = projectData.challenges.map(
             (challenge: any, index: number) => ({
-              number: index + 1,
+              number: challenge.number || index + 1,
               title: challenge.title || "",
               description: challenge.description || "",
             })
@@ -162,7 +168,17 @@ const ProjectUpdate: React.FC = () => {
           "프로젝트 데이터를 불러오는 중 오류가 발생했습니다:",
           err
         );
-        setError("프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
+
+        if (axios.isAxiosError(err)) {
+          console.error("서버 응답 상태:", err.response?.status);
+          console.error("서버 응답 데이터:", err.response?.data);
+          setError(
+            `프로젝트 데이터를 불러오는 중 오류: ${err.response?.data?.message || err.message}`
+          );
+        } else {
+          setError("프로젝트 데이터를 불러오는 중 오류가 발생했습니다.");
+        }
+
         setIsLoading(false);
       }
     };
@@ -372,6 +388,13 @@ const ProjectUpdate: React.FC = () => {
     setError(null);
 
     try {
+      console.log("폼 제출 시작");
+
+      // id 확인
+      if (!id) {
+        throw new Error("프로젝트 ID가 유효하지 않습니다.");
+      }
+
       // 유효성 검사
       if (basicInfo.title.trim() === "") {
         throw new Error("프로젝트 제목은 필수 항목입니다.");
@@ -418,76 +441,134 @@ const ProjectUpdate: React.FC = () => {
         throw new Error("최소한 하나 이상의 도전 과제를 입력해주세요.");
       }
 
-      // FormData 생성 및 데이터 추가
-      const formData = new FormData();
-      formData.append("title", basicInfo.title);
-      formData.append("description", basicInfo.summary); // 백엔드는 'description' 필드 사용
-      formData.append("githubUrl", basicInfo.githubUrl);
-      formData.append("periodStart", basicInfo.startDate); // 백엔드는 'periodStart' 필드 사용
-      formData.append("periodEnd", basicInfo.endDate); // 백엔드는 'periodEnd' 필드 사용
-      formData.append("period", getProjectPeriod()); // 형식화된 기간 문자열 추가
-      formData.append("role", basicInfo.role);
-      formData.append("pin", pin.toString()); // 고정 여부 추가
+      // 프로젝트 데이터를 더 단순화
+      const projectData = {
+        title: basicInfo.title,
+        summary: basicInfo.summary,
+        githubUrl: basicInfo.githubUrl,
+        role: basicInfo.role,
+        pin: String(pin),
+        technologies: technologies,
+        // 복잡한 중첩 데이터 제거
+      };
 
-      // 기술 스택 추가 (백엔드는 'stack' 필드 사용)
-      technologies.forEach((tech, index) => {
-        formData.append(`stack[${index}]`, tech);
-      });
+      console.log(
+        "전송할 단순화된 프로젝트 데이터 (JSON):",
+        JSON.stringify(projectData)
+      );
+      const token = localStorage.getItem("admin_token");
 
-      // 기능 추가
-      validFeatures.forEach((feature, index) => {
-        formData.append(`features[${index}][title]`, feature.title);
-        formData.append(`features[${index}][description]`, feature.description);
-        formData.append(`features[${index}][imageAlt]`, feature.imageAlt);
-        if (feature.imageFile) {
-          formData.append(`featureImages[${index}]`, feature.imageFile);
+      // JSON 데이터로 프로젝트 업데이트
+      try {
+        const updateResponse = await axios.put(
+          api.updateProject(id),
+          projectData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("업데이트 응답:", updateResponse.data);
+
+        // 이미지 파일 업로드 처리
+        const hasNewImages =
+          validFeatures.some((f) => f.imageFile) ||
+          validScreenshots.some((s) => s.imageFile);
+
+        if (hasNewImages) {
+          console.log("새 이미지 파일 업로드 시작");
+
+          // 새 이미지 FormData 생성
+          const imageFormData = new FormData();
+
+          // 프로젝트 ID 추가
+          imageFormData.append("projectId", id);
+
+          // 기능 이미지 추가
+          let featureFileCount = 0;
+          validFeatures.forEach((feature, idx) => {
+            if (feature.imageFile) {
+              imageFormData.append("featureImages", feature.imageFile);
+              imageFormData.append(
+                `featureIndex${featureFileCount}`,
+                idx.toString()
+              );
+              featureFileCount++;
+            }
+          });
+          imageFormData.append("featureCount", featureFileCount.toString());
+
+          // 스크린샷 이미지 추가
+          let screenshotFileCount = 0;
+          validScreenshots.forEach((screenshot, idx) => {
+            if (screenshot.imageFile) {
+              imageFormData.append("screenshotImages", screenshot.imageFile);
+              imageFormData.append(
+                `screenshotIndex${screenshotFileCount}`,
+                idx.toString()
+              );
+              screenshotFileCount++;
+            }
+          });
+          imageFormData.append(
+            "screenshotCount",
+            screenshotFileCount.toString()
+          );
+
+          // 이미지 업로드 요청
+          if (featureFileCount > 0 || screenshotFileCount > 0) {
+            try {
+              const imageUploadResponse = await axios.post(
+                `${api.projects}/images/${id}`,
+                imageFormData,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+              console.log("이미지 업로드 성공:", imageUploadResponse.data);
+            } catch (imageErr) {
+              console.error("이미지 업로드 실패:", imageErr);
+            }
+          }
         }
-      });
 
-      // 스크린샷 추가
-      validScreenshots.forEach((screenshot, index) => {
-        formData.append(`screenshots[${index}][imageAlt]`, screenshot.imageAlt);
-        formData.append(
-          `screenshots[${index}][description]`,
-          screenshot.description || ""
-        );
-        if (screenshot.imageFile) {
-          formData.append(`screenshotImages[${index}]`, screenshot.imageFile);
+        alert("프로젝트가 성공적으로 수정되었습니다.");
+        navigate("/projects");
+      } catch (err) {
+        console.error("API 요청 중 오류:", err);
+
+        if (axios.isAxiosError(err)) {
+          const errorMsg =
+            err.response?.data?.message || "서버 요청 중 오류가 발생했습니다.";
+          console.error("서버 응답 상태:", err.response?.status);
+          console.error("서버 응답 데이터:", err.response?.data);
+          setError(errorMsg);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(
+            "프로젝트를 수정하는 중 오류가 발생했습니다. 다시 시도해주세요."
+          );
         }
-      });
-
-      // 도전 과제 추가 (백엔드는 'techChallenges' 필드 사용)
-      validChallenges.forEach((challenge, index) => {
-        formData.append(
-          `techChallenges[${index}][number]`,
-          challenge.number.toString()
-        );
-        formData.append(`techChallenges[${index}][title]`, challenge.title);
-        formData.append(
-          `techChallenges[${index}][description]`,
-          challenge.description
-        );
-      });
-
-      // API 호출
-      if (!id) {
-        throw new Error("프로젝트 ID가 유효하지 않습니다.");
+        throw err; // 상위 catch 블록으로 전파
       }
-
-      await axios.put(api.updateProject(id), formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-        },
-      });
-
-      // 성공 시 목록 페이지로 이동
-      navigate("/projects");
     } catch (err) {
-      if (err instanceof Error) {
+      console.error("폼 제출 중 오류 발생:", err);
+
+      if (axios.isAxiosError(err)) {
+        const errorMsg =
+          err.response?.data?.message || "서버 요청 중 오류가 발생했습니다.";
+        console.error("서버 응답 상태:", err.response?.status);
+        console.error("서버 응답 데이터:", err.response?.data);
+        setError(errorMsg);
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        console.error("프로젝트 수정 중 오류가 발생했습니다:", err);
         setError(
           "프로젝트를 수정하는 중 오류가 발생했습니다. 다시 시도해주세요."
         );
