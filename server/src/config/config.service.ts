@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import * as dotenv from "dotenv";
+import * as path from "path";
 
 @Injectable()
 export class ConfigService {
   private readonly envConfig: { [key: string]: string };
 
   constructor() {
-    dotenv.config();
+    dotenv.config({ path: path.resolve(process.cwd(), ".env") });
     this.envConfig = process.env;
   }
 

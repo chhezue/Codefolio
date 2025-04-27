@@ -1,17 +1,23 @@
 import { Logger, Module } from "@nestjs/common";
 import { ConfigService } from "@config/config.service";
-import { ConfigModule } from "@config/config.module";
+import { ConfigModule as CustomConfigModule } from "@config/config.module";
+import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ProjectModule } from "@project/project.module";
 import { Project } from "@project/project.entity";
 import { MailModule } from "@mail/mail.module";
-import { AuthModule } from '@auth/auth.module';
-
+import { AuthModule } from "@auth/auth.module";
+import * as dotenv from 'dotenv';
+dotenv.config();
 @Module({
+
   imports: [
-    ConfigModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    CustomConfigModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [CustomConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger("PostgreSQL");

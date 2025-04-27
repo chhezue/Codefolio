@@ -6,6 +6,7 @@ import Profile from "./pages/Profile";
 import ProjectList from "./pages/ProjectList";
 import ProjectCreate from "./pages/ProjectCreate";
 import ProjectPost from "./pages/ProjectPost";
+import ProjectUpdate from "./pages/ProjectUpdate";
 
 const App: React.FC = () => {
   return (
@@ -16,8 +17,9 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Main />} />
             <Route path="/projects" element={<ProjectList />} />
-            <Route path="/projects/:id" element={<ProjectPost />} />
             <Route path="/projects/create" element={<ProjectCreate />} />
+            <Route path="/projects/edit/:id" element={<ProjectUpdate />} />
+            <Route path="/projects/:id" element={<ProjectPost />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
